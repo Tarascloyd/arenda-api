@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+    <title>Booking.clone</title>
+</head>
+
+<body>
+
+<h1>Booking.clone</h1>
+
+<hr>
+
+<div class="container">
+
+    <h3 th:text="${city.name}" />
+
+    <p th:text="${city.about}" />
+
+    <h4>Список отелей</h4>
+
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Добавлено</th>
+            <th>Цена</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="hotel : ${hotels}">
+
+            <td>
+                <a th:href="@{/hotel/{id}(id=${hotel.id})}"
+                   class="btn btn-primary btn-sm mb-3" th:text="${hotel.name}">
+                </a>
+            </td>
+            <td th:text="${hotel.about}" />
+            <td th:text="${hotel.createDate}" />
+            <td>
+                <a th:href="@{/hotel/{id}/book(id=${hotel.id})}"
+                   th:text="'от' + ${hotel.price}"
+                   class="btn btn-info btn-sm">
+                </a>
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

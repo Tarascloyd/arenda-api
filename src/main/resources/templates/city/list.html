@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+    <title>Booking.clone</title>
+</head>
+
+<body>
+
+<h1>Booking.clone</h1>
+
+<hr>
+
+<div class="container">
+
+    <h3>Доступные города</h3>
+
+    <form action="#" th:action="@{/city/search}"
+          method="GET" class="form-inline">
+
+        <input type="search"
+               name="name"
+               placeholder="Name"
+               class="form-control-sm ml-5 mr-2 mb-3" />
+
+        <button type="submit"
+                class="btn btn-success btn-sm mb-3">Search</button>
+
+    </form>
+
+    <table class="table">
+        <thead class="thead-dark">
+        <tr>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Добавлено</th>
+            <th>Действие</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="tempCity : ${cities}">
+
+            <td>
+                <a th:href="@{/city/{id}/hotel(id=${tempCity.id})}"
+                   class="btn btn-primary btn-sm mb-3" th:text="${tempCity.name}">
+                </a>
+            </td>
+            <td th:text="${tempCity.about}" />
+            <td th:text="${tempCity.createDate}" />
+            <td>
+                <a th:href="@{/city/{id}(id=${tempCity.id})}"
+                   class="btn btn-info btn-sm">
+                    Подробнее
+                </a>
+            </td>
+
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
