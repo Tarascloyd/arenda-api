@@ -13,7 +13,7 @@
 <body>
 
 <h1>Booking.clone</h1>
-
+<a th:href="@{/}">Back to Home</a>
 <hr>
 
 <div class="container">
@@ -32,30 +32,37 @@
             <th>Кол-во кроватей</th>
             <th>Кол-во комнат</th>
             <th>Цена</th>
+            <th>Свободных номеров</th>
         </tr>
         </thead>
 
         <tbody>
-        <tr th:each="room : ${rooms}">
+        <tr th:each="roomType : ${roomTypes}">
 
             <td>
-                <a th:href="@{/room/{id}(id=${room.id})}"
-                   class="btn btn-primary btn-sm mb-3" th:text="${room.name}">
+                <a th:href="@{/roomType/{id}(id=${roomType.id})}"
+                   class="btn btn-primary btn-sm mb-3" th:text="${roomType.name}">
                 </a>
             </td>
-            <td th:text="${room.numberPeople}" />
-            <td th:text="${room.numberBeds}" />
-            <td th:text="${room.numberRooms}" />
+            <td th:text="${roomType.numberPeople}" />
+            <td th:text="${roomType.numberBeds}" />
+            <td th:text="${roomType.numberRooms}" />
             <td>
-                <a th:href="@{/room/{id}/book(id=${room.id})}"
-                   th:text="${room.price}"
+                <a th:href="@{/roomType/{id}/book(id=${roomType.id})}"
+                   th:text="${roomType.price}"
                    class="btn btn-info btn-sm">
                 </a>
             </td>
+            <td th:text="${roomType.count}" />
 
         </tr>
         </tbody>
     </table>
+
+    <a th:href="@{/roomtype/add}"
+       class="btn btn-primary btn-sm mb-3">
+        Добавить номер
+    </a>
 
 </div>
 

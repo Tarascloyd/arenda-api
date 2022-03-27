@@ -2,10 +2,10 @@ package com.taras.arenda.controller;
 
 import com.taras.arenda.jpa.domain.City;
 import com.taras.arenda.jpa.domain.Hotel;
-import com.taras.arenda.jpa.domain.Room;
+import com.taras.arenda.jpa.domain.RoomType;
 import com.taras.arenda.jpa.repository.CityRepository;
 import com.taras.arenda.jpa.repository.HotelRepository;
-import com.taras.arenda.jpa.repository.RoomRepository;
+import com.taras.arenda.jpa.repository.RoomTypeRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -18,9 +18,9 @@ public class HomeController {
 
     private CityRepository cityRepo;
     private HotelRepository hotelRepo;
-    private RoomRepository roomRepo;
+    private RoomTypeRepository roomRepo;
 
-    public HomeController(CityRepository cityRepo, HotelRepository hotelRepo, RoomRepository roomRepo) {
+    public HomeController(CityRepository cityRepo, HotelRepository hotelRepo, RoomTypeRepository roomRepo) {
         this.cityRepo = cityRepo;
         this.hotelRepo = hotelRepo;
         this.roomRepo = roomRepo;
@@ -77,22 +77,23 @@ public class HomeController {
             hotelRepo.saveAll(hotels);
 
             Random rnd = new Random();
-            List<Room> rooms = new ArrayList<>();
+            List<RoomType> roomTypes = new ArrayList<>();
             for (int i = 0; i < 30; i++) {
                 int numberBeds = rnd.nextInt(3) + 1;
-                Room room = Room.builder()
+                RoomType roomType = RoomType.builder()
                         .name(String.valueOf(i + 1)).numberPeople(numberBeds * 2)
                         .numberBeds(numberBeds).numberRooms(rnd.nextInt(numberBeds / 2 + 1) + 1)
                         .hotel(hotels.get(rnd.nextInt(6)))
+                        .count(rnd.nextInt(5) + 1)
                         .price((rnd.nextInt(501) + 800) * numberBeds).build();
-                rooms.add(room);
+                roomTypes.add(roomType);
             }
-            roomRepo.saveAll(rooms);
+            roomRepo.saveAll(roomTypes);
 
             for (Hotel hotel : hotels) {
-                List<Room> hRooms = roomRepo.findByHotel(hotel);
-                if (hRooms.size() != 0) {
-                    int minPrice = hRooms.stream().map(Room :: getPrice).sorted().findFirst().orElse(0);
+                List<RoomType> hRoomTypes = roomRepo.findByHotel(hotel);
+                if (hRoomTypes.size() != 0) {
+                    int minPrice = hRoomTypes.stream().map(RoomType:: getPrice).sorted().findFirst().orElse(0);
                     hotel.setPrice(minPrice);
                 }
             }

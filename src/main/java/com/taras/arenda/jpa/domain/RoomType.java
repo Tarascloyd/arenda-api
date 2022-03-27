@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Room implements Serializable, Comparable<Room> {
+public class RoomType implements Serializable, Comparable<RoomType> {
 
     @Id
     @Column(name = "ID")
@@ -41,13 +41,16 @@ public class Room implements Serializable, Comparable<Room> {
     @Column(name = "PRICE")
     private int price;
 
+    @Column(name = "COUNT")
+    private int count;
+
     @Column(name = "CREATE_DATE")
     @Builder.Default
     private LocalDateTime createDate = LocalDateTime.now();
 
 
     @Override
-    public int compareTo(Room o) {
+    public int compareTo(RoomType o) {
         if (getId() == null || o == null || o.getId() == null) return 0;
         return getId().compareTo(o.getId());
     }

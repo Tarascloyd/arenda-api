@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Booking.clone</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+</head>
+
+<body>
+
+<h1>Booking.clone</h1>
+<a th:href="@{/}">Back to Home</a>
+<hr>
+
+
+<form method="POST" th:action="@{/roomtype}" th:object="${roomType}">
+    <h3>Добавить номер к вашему отелю</h3>
+    <h3 th:text="${hotel.name}" />
+
+    <div th:if="${#fields.hasErrors()}">
+				<span class="validationError">
+					Пожалуйста, исправьте все ошибки
+				</span>
+    </div>
+
+    <input type="hidden" th:field="*{id}" />
+
+    <label for="name">Название: </label>
+    <input type="text" th:field="*{name}" placeholder="Название"/>
+    <span class="validationError"
+          th:if="${#fields.hasErrors('name')}"
+          th:errors="*{name}">Ошибка в имени</span>
+    <br/>
+
+    <label for="name">Вместимость: </label>
+    <input type="text" th:field="*{numberPeople}" placeholder="Вместимость"/>
+    <span class="validationError"
+          th:if="${#fields.hasErrors('numberPeople')}"
+          th:errors="*{numberPeople}">Ошибка вместимости</span>
+    <br/>
+
+    <input type="submit" value="Добавить номер"/>
+</form>
+
+<hr>
+<a th:href="@{/hotel/{id}(id=${hotel.id})}">Назад к списку номеров</a>
+</body>
+</html>
