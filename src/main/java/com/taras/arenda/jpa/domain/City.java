@@ -2,6 +2,7 @@ package com.taras.arenda.jpa.domain;
 
 import javax.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Where(clause = "deleted = false")
 public class City implements Serializable, Comparable<City> {
 
     @Id
@@ -31,6 +33,9 @@ public class City implements Serializable, Comparable<City> {
     @Column(name = "CREATE_DATE")
     @Builder.Default
     private LocalDateTime createDate = LocalDateTime.now();
+
+    @Column(name="DELETED")
+    private boolean deleted;
 
     @Override
     public int compareTo(City o) {

@@ -4,15 +4,11 @@ import com.taras.arenda.jpa.domain.Hotel;
 import com.taras.arenda.jpa.domain.RoomType;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@Controller
+@CrossOrigin
+@RestController
 @RequestMapping("/hotel")
-@SessionAttributes("hotel")
 public class HotelController {
 
     private RoomTypeRepository roomTypeRepo;
@@ -23,12 +19,9 @@ public class HotelController {
         this.hotelRepo = hotelRepo;
     }
 
-    @GetMapping("/{id}")
-    public String getRoomTypesByHotel(@PathVariable Long id, Model theModel) {
+    @GetMapping("/{id}/roomtype")
+    public @ResponseBody Iterable<RoomType> getRoomTypesByHotel(@PathVariable Long id) {
         Hotel hotel = hotelRepo.getById(id);
-        List<RoomType> roomTypes = roomTypeRepo.findByHotel(hotel);
-        theModel.addAttribute("roomTypes", roomTypes);
-        theModel.addAttribute("hotel", hotel);
-        return "hotel/roomTypes";
+        return roomTypeRepo.findByHotel(hotel);
     }
 }
