@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
     List<RoomType> findByHotel(Hotel hotel);
+    List<RoomType> findTop5ByOrderByPriceAsc();
 }

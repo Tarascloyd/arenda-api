@@ -7,9 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 
+
 @CrossOrigin
 @RestController
-@RequestMapping("/roomtype")
+@RequestMapping("api/v1/roomtype")
 public class RoomTypeController {
 
     private RoomTypeRepository roomTypeRepo;
@@ -24,6 +25,12 @@ public class RoomTypeController {
     public @ResponseBody RoomType getRoomType(@PathVariable Long id) {
 
         return roomTypeRepo.getById(id);
+    }
+
+    @GetMapping("/top5")
+    public @ResponseBody Iterable<RoomType> getTop5RoomType() {
+
+        return roomTypeRepo.findTop5ByOrderByPriceAsc();
     }
 
     @PostMapping({"/", ""})

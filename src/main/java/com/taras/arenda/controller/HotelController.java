@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/hotel")
+@RequestMapping("api/v1/hotel")
 public class HotelController {
 
     private RoomTypeRepository roomTypeRepo;

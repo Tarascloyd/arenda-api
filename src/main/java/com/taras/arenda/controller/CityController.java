@@ -15,7 +15,7 @@ import java.util.Random;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/city")
+@RequestMapping("api/v1/city")
 public class CityController {
 
     private CityRepository cityRepo;
@@ -90,11 +90,20 @@ public class CityController {
             for (Hotel hotel : hotels) {
                 List<RoomType> hRoomTypes = roomTypeRepo.findByHotel(hotel);
                 if (hRoomTypes.size() != 0) {
-                    int minPrice = hRoomTypes.stream().map(RoomType:: getPrice).sorted().findFirst().orElse(0);
+                    int minPrice = hRoomTypes.stream().map(RoomType::getPrice).sorted().findFirst().orElse(0);
                     hotel.setPrice(minPrice);
                 }
             }
             hotelRepo.saveAll(hotels);
+
+            for (City city : cities) {
+                List<Hotel> hhotels = hotelRepo.findByCity(city);
+                if (hhotels.size() != 0) {
+                    int minPrice = hhotels.stream().map(Hotel::getPrice).sorted().findFirst().orElse(0);
+                    city.setPrice(minPrice);
+                }
+            }
+            cityRepo.saveAll(cities);
         }
 
     }

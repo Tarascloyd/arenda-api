@@ -30,6 +30,9 @@ public class City implements Serializable, Comparable<City> {
     @Column(name = "ABOUT")
     private String about;
 
+    @Column(name = "PRICE")
+    private int price;
+
     @Column(name = "CREATE_DATE")
     @Builder.Default
     private LocalDateTime createDate = LocalDateTime.now();
