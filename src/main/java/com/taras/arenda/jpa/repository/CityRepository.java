@@ -1,6 +1,6 @@
 package com.taras.arenda.jpa.repository;
 
-import com.taras.arenda.jpa.domain.City;
+import com.taras.arenda.jpa.entity.City;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

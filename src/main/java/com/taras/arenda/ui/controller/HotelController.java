@@ -1,7 +1,7 @@
 package com.taras.arenda.ui.controller;
 
-import com.taras.arenda.jpa.domain.Hotel;
-import com.taras.arenda.jpa.domain.RoomType;
+import com.taras.arenda.jpa.entity.Hotel;
+import com.taras.arenda.jpa.entity.RoomType;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
 import org.springframework.web.bind.annotation.*;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/v1/hotel")
 public class HotelController {
 
-    private RoomTypeRepository roomTypeRepo;
-    private HotelRepository hotelRepo;
+    private final RoomTypeRepository roomTypeRepo;
+    private final HotelRepository hotelRepo;
 
     public HotelController(RoomTypeRepository roomRepo, HotelRepository hotelRepo) {
         this.roomTypeRepo = roomRepo;
@@ -20,7 +20,7 @@ public class HotelController {
     }
 
     @GetMapping({"/", ""})
-    public @ResponseBody Iterable<Hotel> getAllHotelsOrSearch(
+    public Iterable<Hotel> getAllHotelsOrSearch(
             @RequestParam("name") String name) {
 
         if (name.trim().isEmpty()) {
@@ -31,7 +31,7 @@ public class HotelController {
     }
 
     @GetMapping("/{id}/roomtype")
-    public @ResponseBody Iterable<RoomType> getRoomTypesByHotel(@PathVariable Long id) {
+    public Iterable<RoomType> getRoomTypesByHotel(@PathVariable Long id) {
         Hotel hotel = hotelRepo.getById(id);
         return roomTypeRepo.findByHotel(hotel);
     }

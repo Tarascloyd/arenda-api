@@ -1,8 +1,8 @@
 package com.taras.arenda.ui.controller;
 
-import com.taras.arenda.jpa.domain.City;
-import com.taras.arenda.jpa.domain.Hotel;
-import com.taras.arenda.jpa.domain.RoomType;
+import com.taras.arenda.jpa.entity.City;
+import com.taras.arenda.jpa.entity.Hotel;
+import com.taras.arenda.jpa.entity.RoomType;
 import com.taras.arenda.jpa.repository.CityRepository;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
@@ -29,7 +29,7 @@ public class CityController {
     }
 
     @GetMapping({"/", ""})
-    public @ResponseBody Iterable<City> getAllCitiesOrSearch(
+    public Iterable<City> getAllCitiesOrSearch(
             @RequestParam("name") String name) {
 
         if (name.trim().isEmpty()) {
@@ -40,13 +40,13 @@ public class CityController {
     }
 
     @GetMapping("/{id}")
-    public @ResponseBody City getCity(@PathVariable Long id) {
+    public City getCity(@PathVariable Long id) {
 
         return cityRepo.getById(id);
     }
 
     @GetMapping("/{id}/hotel")
-    public @ResponseBody Iterable<Hotel> getHotelsByCity(@PathVariable Long id) {
+    public Iterable<Hotel> getHotelsByCity(@PathVariable Long id) {
         City city = cityRepo.getById(id);
         return hotelRepo.findByCity(city);
     }

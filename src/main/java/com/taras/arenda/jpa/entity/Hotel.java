@@ -1,4 +1,4 @@
-package com.taras.arenda.jpa.domain;
+package com.taras.arenda.jpa.entity;
 
 
 import lombok.*;
