@@ -26,6 +26,7 @@ dependencies {
 	//implementation 'org.liquibase:liquibase-core'
 	implementation 'com.h2database:h2'
 	implementation 'javax.validation:validation-api'
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
