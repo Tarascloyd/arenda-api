@@ -1,4 +1,4 @@
-package com.taras.arenda.controller;
+package com.taras.arenda.ui.controller;
 
 import com.taras.arenda.jpa.domain.Hotel;
 import com.taras.arenda.jpa.domain.RoomType;
@@ -19,9 +19,35 @@ public class HotelController {
         this.hotelRepo = hotelRepo;
     }
 
+    @GetMapping({"/", ""})
+    public @ResponseBody Iterable<Hotel> getAllHotelsOrSearch(
+            @RequestParam("name") String name) {
+
+        if (name.trim().isEmpty()) {
+            return hotelRepo.findAll();
+        }
+        return hotelRepo.findByNameContainsAllIgnoreCase(name);
+
+    }
+
     @GetMapping("/{id}/roomtype")
     public @ResponseBody Iterable<RoomType> getRoomTypesByHotel(@PathVariable Long id) {
         Hotel hotel = hotelRepo.getById(id);
         return roomTypeRepo.findByHotel(hotel);
+    }
+
+    @PostMapping({"/", ""})
+    public void createHotel() {
+
+    }
+
+    @PatchMapping({"/", ""})
+    public void updateHotel() {
+
+    }
+
+    @DeleteMapping({"/", ""})
+    public void deleteHotel() {
+
     }
 }

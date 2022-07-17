@@ -1,4 +1,4 @@
-package com.taras.arenda.controller;
+package com.taras.arenda.ui.controller;
 
 import com.taras.arenda.jpa.domain.City;
 import com.taras.arenda.jpa.domain.Hotel;
@@ -18,14 +18,52 @@ import java.util.Random;
 @RequestMapping("api/v1/city")
 public class CityController {
 
-    private CityRepository cityRepo;
-    private HotelRepository hotelRepo;
-    private RoomTypeRepository roomTypeRepo;
+    private final CityRepository cityRepo;
+    private final HotelRepository hotelRepo;
+    private final RoomTypeRepository roomTypeRepo;
 
     public CityController(CityRepository cityRepo, HotelRepository hotelRepo, RoomTypeRepository roomTypeRepo) {
         this.cityRepo = cityRepo;
         this.hotelRepo = hotelRepo;
         this.roomTypeRepo = roomTypeRepo;
+    }
+
+    @GetMapping({"/", ""})
+    public @ResponseBody Iterable<City> getAllCitiesOrSearch(
+            @RequestParam("name") String name) {
+
+        if (name.trim().isEmpty()) {
+            return cityRepo.findAll();
+        }
+        return cityRepo.findByNameContainsAllIgnoreCase(name);
+
+    }
+
+    @GetMapping("/{id}")
+    public @ResponseBody City getCity(@PathVariable Long id) {
+
+        return cityRepo.getById(id);
+    }
+
+    @GetMapping("/{id}/hotel")
+    public @ResponseBody Iterable<Hotel> getHotelsByCity(@PathVariable Long id) {
+        City city = cityRepo.getById(id);
+        return hotelRepo.findByCity(city);
+    }
+
+    @PostMapping({"/", ""})
+    public void createCity() {
+
+    }
+
+    @PatchMapping({"/", ""})
+    public void updateCity() {
+
+    }
+
+    @DeleteMapping({"/", ""})
+    public void deleteCity() {
+
     }
 
     @PostConstruct
@@ -106,28 +144,5 @@ public class CityController {
             cityRepo.saveAll(cities);
         }
 
-    }
-
-    @GetMapping({"/", ""})
-    public @ResponseBody Iterable<City> getAllCities() {
-
-        return cityRepo.findAll();
-    }
-
-    @GetMapping("/search")
-    public @ResponseBody Iterable<City> search(
-            @RequestParam("name") String name) {
-
-        if (name.trim().isEmpty()) {
-            return cityRepo.findAll();
-        }
-        return cityRepo.findByNameContainsAllIgnoreCase(name);
-
-    }
-
-    @GetMapping("/{id}/hotel")
-    public @ResponseBody Iterable<Hotel> getHotelByCity(@PathVariable Long id) {
-        City city = cityRepo.getById(id);
-        return hotelRepo.findByCity(city);
     }
 }

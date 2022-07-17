@@ -1,4 +1,4 @@
-package com.taras.arenda.controller;
+package com.taras.arenda.ui.controller;
 
 import com.taras.arenda.jpa.domain.RoomType;
 import com.taras.arenda.jpa.repository.HotelRepository;
@@ -35,7 +35,7 @@ public class RoomTypeController {
 
     @PostMapping({"/", ""})
     @ResponseStatus(HttpStatus.CREATED)
-    public RoomType saveRoomType(@RequestBody final RoomType roomType) {
+    public RoomType createRoomType(@RequestBody final RoomType roomType) {
 
         return roomTypeRepo.save(roomType);
     }
