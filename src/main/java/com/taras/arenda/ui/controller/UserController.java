@@ -7,7 +7,10 @@ import com.taras.arenda.ui.model.CreateUserResponseModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @CrossOrigin
 @RestController
@@ -25,7 +28,7 @@ public class UserController {
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
     )
-    public @ResponseBody CreateUserResponseModel register(@RequestBody final CreateUserRequestModel userDetails)
+    public CreateUserResponseModel register(@Valid @RequestBody final CreateUserRequestModel userDetails)
     {
         ModelMapper modelMapper = new ModelMapper();
 
