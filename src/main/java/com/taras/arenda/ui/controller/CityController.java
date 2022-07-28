@@ -6,6 +6,8 @@ import com.taras.arenda.jpa.entity.RoomType;
 import com.taras.arenda.jpa.repository.CityRepository;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -16,23 +18,18 @@ import java.util.Random;
 @CrossOrigin
 @RestController
 @RequestMapping("api/v1/city")
+@AllArgsConstructor
 public class CityController {
 
+    private static final String NOT_IMPLEMENTED_MESSAGE = "Not implemented yet in version v1";
     private final CityRepository cityRepo;
     private final HotelRepository hotelRepo;
     private final RoomTypeRepository roomTypeRepo;
 
-    public CityController(CityRepository cityRepo, HotelRepository hotelRepo, RoomTypeRepository roomTypeRepo) {
-        this.cityRepo = cityRepo;
-        this.hotelRepo = hotelRepo;
-        this.roomTypeRepo = roomTypeRepo;
-    }
-
     @GetMapping({"/", ""})
     public Iterable<City> getAllCitiesOrSearch(
-            @RequestParam("name") String name) {
-
-        if (name.trim().isEmpty()) {
+            @RequestParam(name = "name", required = false) String name) {
+        if (name == null || name.trim().isEmpty()) {
             return cityRepo.findAll();
         }
         return cityRepo.findByNameContainsAllIgnoreCase(name);
@@ -51,19 +48,25 @@ public class CityController {
         return hotelRepo.findByCity(city);
     }
 
+    //TODO endpoint
+    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
     @PostMapping({"/", ""})
-    public void createCity() {
-
+    public String createCity() {
+        return NOT_IMPLEMENTED_MESSAGE;
     }
 
+    //TODO endpoint
+    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
     @PatchMapping({"/", ""})
-    public void updateCity() {
-
+    public String updateCity() {
+        return NOT_IMPLEMENTED_MESSAGE;
     }
 
+    //TODO endpoint
+    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
     @DeleteMapping({"/", ""})
-    public void deleteCity() {
-
+    public String deleteCity() {
+        return NOT_IMPLEMENTED_MESSAGE;
     }
 
     @PostConstruct
