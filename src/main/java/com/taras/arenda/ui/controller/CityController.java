@@ -1,5 +1,6 @@
 package com.taras.arenda.ui.controller;
 
+import com.taras.arenda.Service.CityService;
 import com.taras.arenda.jpa.entity.City;
 import com.taras.arenda.jpa.entity.Hotel;
 import com.taras.arenda.jpa.entity.RoomType;
@@ -26,26 +27,27 @@ public class CityController {
     private final HotelRepository hotelRepo;
     private final RoomTypeRepository roomTypeRepo;
 
+    private final CityService cityService;
+
     @GetMapping({"/", ""})
     public Iterable<City> getAllCitiesOrSearch(
             @RequestParam(name = "name", required = false) String name) {
         if (name == null || name.trim().isEmpty()) {
-            return cityRepo.findAll();
+            return cityService.findAll();
         }
-        return cityRepo.findByNameContainsAllIgnoreCase(name);
-
+        return cityService.findByName(name);
     }
 
     @GetMapping("/{id}")
-    public City getCity(@PathVariable Long id) {
+    public City getCityById(@PathVariable Long id) {
 
-        return cityRepo.getById(id);
+        return cityService.findById(id);
     }
 
     @GetMapping("/{id}/hotel")
     public Iterable<Hotel> getHotelsByCity(@PathVariable Long id) {
-        City city = cityRepo.getById(id);
-        return hotelRepo.findByCity(city);
+
+        return cityService.getHotels(id);
     }
 
     //TODO endpoint
