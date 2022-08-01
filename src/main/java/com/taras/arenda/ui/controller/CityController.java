@@ -131,7 +131,7 @@ public class CityController {
             roomTypeRepo.saveAll(roomTypes);
 
             for (Hotel hotel : hotels) {
-                List<RoomType> hRoomTypes = roomTypeRepo.findByHotel(hotel);
+                List<RoomType> hRoomTypes = roomTypeRepo.findAllByHotel(hotel);
                 if (hRoomTypes.size() != 0) {
                     int minPrice = hRoomTypes.stream().map(RoomType::getPrice).sorted().findFirst().orElse(0);
                     hotel.setPrice(minPrice);
@@ -140,7 +140,7 @@ public class CityController {
             hotelRepo.saveAll(hotels);
 
             for (City city : cities) {
-                List<Hotel> hhotels = hotelRepo.findByCity(city);
+                List<Hotel> hhotels = hotelRepo.findAllByCity(city);
                 if (hhotels.size() != 0) {
                     int minPrice = hhotels.stream().map(Hotel::getPrice).sorted().findFirst().orElse(0);
                     city.setPrice(minPrice);

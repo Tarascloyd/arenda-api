@@ -1,8 +1,7 @@
 package com.taras.arenda.ui.controller;
 
+import com.taras.arenda.Service.RoomTypeService;
 import com.taras.arenda.jpa.entity.RoomType;
-import com.taras.arenda.jpa.repository.HotelRepository;
-import com.taras.arenda.jpa.repository.RoomTypeRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,25 +14,24 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class RoomTypeController {
 
-    private final RoomTypeRepository roomTypeRepo;
-    private HotelRepository hotelRepo;
+    private final RoomTypeService roomTypeService;
 
     @GetMapping("/{id}")
     public RoomType getRoomType(@PathVariable Long id) {
 
-        return roomTypeRepo.getById(id);
+        return roomTypeService.getById(id);
     }
 
     @GetMapping("/top5")
     public Iterable<RoomType> getTop5RoomType() {
 
-        return roomTypeRepo.findTop5ByOrderByPriceAsc();
+        return roomTypeService.findTop5ByLowerPrice();
     }
 
     @PostMapping({"/", ""})
     @ResponseStatus(HttpStatus.CREATED)
     public RoomType createRoomType(@RequestBody final RoomType roomType) {
 
-        return roomTypeRepo.save(roomType);
+        return roomTypeService.createRoomType(roomType);
     }
 }

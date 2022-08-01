@@ -35,6 +35,6 @@ public class CityService {
     public Iterable<Hotel> getHotels(Long id) {
 
         City city = findById(id);
-        return hotelRepo.findByCity(city);
+        return hotelRepo.findAllByCity(city);
     }
 }
