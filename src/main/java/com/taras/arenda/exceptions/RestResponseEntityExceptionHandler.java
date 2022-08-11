@@ -15,6 +15,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
@@ -22,9 +23,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler({ResourceNotFoundException.class})
     protected ResponseEntity<Object> handleNotFoundException(Exception exception, WebRequest request){
-
-        return new ResponseEntity<>("Resource Not Found", new HttpHeaders(), HttpStatus.NOT_FOUND);
-
+        String resourceName = Optional.ofNullable(exception.getMessage()).orElse("");
+        if (resourceName.length() > 1) resourceName += ":";
+        return new ResponseEntity<>(resourceName + "Resource Not Found", new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
     @Override

@@ -25,6 +25,6 @@ public class HotelService {
 
     public Hotel findById(Long id) {
         return hotelRepo.findById(id)
-                .orElseThrow(ResourceNotFoundException::new);
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel"));
     }
 }
