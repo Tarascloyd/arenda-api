@@ -2,6 +2,7 @@ package com.taras.arenda;
 
 import com.taras.arenda.jpa.repository.UserRepository;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,17 +20,26 @@ public class UserControllerTest {
     private static final String USERS_API_V1_URL = "/api/v1/users";
     @Autowired
     private TestRestTemplate testRestTemplate;
-
     @Autowired
     private UserRepository userRepo;
+
+    @BeforeEach
+    public void cleanup() {
+        userRepo.deleteAll();
+    }
 
     @Test
     public void postUser_whenUserIsValid_receiveCreated() {
         CreateUserRequestModel user = createValidUser();
-
         ResponseEntity<Object> response = testRestTemplate.postForEntity(USERS_API_V1_URL, user, Object.class);
-
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+
+    @Test
+    public void postUser_whenUserIsValid_userSavedToDb() {
+        CreateUserRequestModel user = createValidUser();
+        testRestTemplate.postForEntity(USERS_API_V1_URL, user, Object.class);
+        assertThat(userRepo.count()).isEqualTo(1);
     }
 
     private CreateUserRequestModel createValidUser() {
@@ -39,14 +49,5 @@ public class UserControllerTest {
         user.setEmail("aa@gmail.com");
         user.setPassword("password99");
         return user;
-    }
-
-    @Test
-    public void postUser_whenUserIsValid_userSavedToDb() {
-        CreateUserRequestModel user = createValidUser();
-
-        testRestTemplate.postForEntity(USERS_API_V1_URL, user, Object.class);
-
-        assertThat(userRepo.count()).isEqualTo(1);
     }
 }
