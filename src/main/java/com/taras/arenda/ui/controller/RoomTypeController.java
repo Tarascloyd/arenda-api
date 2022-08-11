@@ -1,11 +1,16 @@
 package com.taras.arenda.ui.controller;
 
 import com.taras.arenda.Service.RoomTypeService;
+import com.taras.arenda.dto.RoomTypeDto;
 import com.taras.arenda.jpa.entity.RoomType;
+import com.taras.arenda.ui.model.CreateRoomTypeRequestModel;
+import com.taras.arenda.ui.model.CreateRoomTypeResponseModel;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 
 
 @CrossOrigin
@@ -30,8 +35,15 @@ public class RoomTypeController {
 
     @PostMapping({"/", ""})
     @ResponseStatus(HttpStatus.CREATED)
-    public RoomType createRoomType(@RequestBody final RoomType roomType) {
+    public CreateRoomTypeResponseModel createRoomType(@Valid @RequestBody final CreateRoomTypeRequestModel roomType) {
 
-        return roomTypeService.createRoomType(roomType);
+        System.out.println("Запрос создания RoomType: " + roomType);
+        ModelMapper modelMapper = new ModelMapper();
+
+        RoomTypeDto roomTypeDto = modelMapper.map(roomType, RoomTypeDto.class);
+
+        RoomTypeDto createdRoomType = roomTypeService.createRoomType(roomTypeDto);
+
+        return modelMapper.map(createdRoomType, CreateRoomTypeResponseModel.class);
     }
 }
