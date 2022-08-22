@@ -1,5 +1,6 @@
 package com.taras.arenda;
 
+import com.taras.arenda.exceptions.ApiError;
 import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
@@ -100,6 +101,30 @@ public class UserControllerTest {
     }
 
     @Test
+    public void postUser_whenUserHasPasswordWithoutUppercaseLetter_receiveBadRequest() {
+        CreateUserRequestModel user = createValidUser();
+        user.setPassword("password99");
+        ResponseEntity<Object> response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postUser_whenUserHasPasswordWithoutLowercaseLetter_receiveBadRequest() {
+        CreateUserRequestModel user = createValidUser();
+        user.setPassword("PASSWORD99");
+        ResponseEntity<Object> response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postUser_whenUserHasPasswordWithoutDigit_receiveBadRequest() {
+        CreateUserRequestModel user = createValidUser();
+        user.setPassword("PasswordP");
+        ResponseEntity<Object> response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
     public void postUser_whenUserHasFirstNameWithLessThanRequired_receiveBadRequest() {
         CreateUserRequestModel user = createValidUser();
         user.setFirstName("F");
@@ -123,6 +148,13 @@ public class UserControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
+    @Test
+    public void postUser_whenUserIsInvalid_receiveApiErrorWithValidationErrors() {
+        User user = new User();
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+        assertThat(response.getBody().getErrors().size()).isEqualTo(4);
+    }
+
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(USERS_API_V1_URL, request, response);
     }
@@ -131,7 +163,7 @@ public class UserControllerTest {
         user.setFirstName("Mark");
         user.setLastName("Mailer");
         user.setEmail("aa@gmail.com");
-        user.setPassword("password99");
+        user.setPassword("Password99");
         return user;
     }
 }
