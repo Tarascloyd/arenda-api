@@ -1,5 +1,6 @@
 package com.taras.arenda.ui.model;
 
+import com.taras.arenda.ui.validation.UniqueEmail;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -24,5 +25,6 @@ public class CreateUserRequestModel {
 
     @NotNull(message="Email cannot be null")
     @Email
+    @UniqueEmail
     private String email;
 }

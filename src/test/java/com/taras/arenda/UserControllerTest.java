@@ -1,17 +1,21 @@
 package com.taras.arenda;
 
+import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.exceptions.ApiError;
 import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -150,10 +154,29 @@ public class UserControllerTest {
 
     @Test
     public void postUser_whenUserIsInvalid_receiveApiErrorWithValidationErrors() {
-        User user = new User();
+        CreateUserRequestModel user = new CreateUserRequestModel();
         ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
         assertThat(response.getBody().getErrors().size()).isEqualTo(4);
     }
+
+    @Test
+    public void postUser_whenAnotherUserHasSameEmail_receiveBadRequest() {
+        userRepo.save(createValidUserEntity());
+
+        CreateUserRequestModel user = createValidUser();
+        ResponseEntity<Object> response = postSignup(user, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postUser_whenAnotherUserHasSameEmail_receiveMessageOfDuplicateEmail() {
+        userRepo.save(createValidUserEntity());
+
+        CreateUserRequestModel user = createValidUser();
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+        assertThat(response.getBody().getErrors().get("email")).isEqualTo("This Email is in use");
+    }
+
 
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(USERS_API_V1_URL, request, response);
@@ -165,5 +188,13 @@ public class UserControllerTest {
         user.setEmail("aa@gmail.com");
         user.setPassword("Password99");
         return user;
+    }
+
+    private User createValidUserEntity() {
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = modelMapper.map(createValidUser(), UserDto.class);
+        userDto.setUserId(UUID.randomUUID().toString());
+        userDto.setEncryptedPassword("ffff");
+        return modelMapper.map(userDto, User.class);
     }
 }

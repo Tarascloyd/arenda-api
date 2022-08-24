@@ -1,61 +1,21 @@
 package com.taras.arenda.exceptions;
 
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import javax.validation.constraints.NotNull;
+import java.util.Map;
 
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApiError {
 
     private HttpStatus status;
     private String message;
-    private List<String> errors;
+    private Map<String, String> errors;
 
-    public ApiError() {
-        super();
-    }
-
-    public ApiError(final HttpStatus status, final String message, final List<String> errors) {
-        super();
-        this.status = status;
-        this.message = message;
-        this.errors = errors;
-    }
-
-    public ApiError(final HttpStatus status, final String message, final String error) {
-        super();
-        this.status = status;
-        this.message = message;
-        errors = Collections.singletonList(error);
-    }
-
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(final HttpStatus status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(final String message) {
-        this.message = message;
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(final List<String> errors) {
-        this.errors = errors;
-    }
-
-    public void setError(final String error) {
-        errors = Collections.singletonList(error);
-    }
 }

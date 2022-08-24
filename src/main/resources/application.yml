@@ -1,0 +1,9 @@
+server:
+  port: 8099
+spring:
+  jpa:
+    properties:
+      javax:
+        persistence:
+          validation:
+            mode: none
