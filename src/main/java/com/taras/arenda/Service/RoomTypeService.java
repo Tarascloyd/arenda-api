@@ -7,7 +7,6 @@ import com.taras.arenda.jpa.entity.RoomType;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 
 @Service

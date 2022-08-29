@@ -1,9 +1,9 @@
 package com.taras.arenda.exceptions;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @Getter
@@ -12,6 +12,7 @@ import java.util.Map;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ApiError {
 
     private HttpStatus status;
