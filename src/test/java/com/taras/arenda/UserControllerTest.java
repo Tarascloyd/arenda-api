@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -199,7 +200,51 @@ public class UserControllerTest {
     public void getUsers_whenThereIsUserInDB_receivePageWithUser() {
         userService.createUser(TestUtil.createValidUserDto());
         ResponseEntity<TestPage<Object>> response = getUsers(new ParameterizedTypeReference<TestPage<Object>>() {});
-        assertThat(response.getBody().getTotalElements()).isEqualTo(0);
+        assertThat(response.getBody().getNumberOfElements()).isEqualTo(1);
+    }
+
+    @Test
+    public void getUsers_whenThereIsUserInDB_receiveUserWithoutPassword() {
+        userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<TestPage<Map<String,Object>>> response = getUsers(new ParameterizedTypeReference<TestPage<Map<String,Object>>>() {});
+        Map<String,Object> entity = response.getBody().getContent().get(0);
+        assertThat(entity.containsKey("password")).isFalse();
+        assertThat(entity.containsKey("encryptedPassword")).isFalse();
+    }
+
+    @Test
+    public void getUsers_whenThereIsUserInDB_receiveUserWithFirstName() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<TestPage<Map<String,Object>>> response = getUsers(new ParameterizedTypeReference<TestPage<Map<String,Object>>>() {});
+        Map<String,Object> entity = response.getBody().getContent().get(0);
+        assertThat(entity.containsKey("firstName")).isTrue();
+        assertThat(entity.get("firstName")).isEqualTo(user.getFirstName());
+    }
+
+    @Test
+    public void getUsers_whenThereIsUserInDB_receiveUserWithLastName() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<TestPage<Map<String,Object>>> response = getUsers(new ParameterizedTypeReference<TestPage<Map<String,Object>>>() {});
+        Map<String,Object> entity = response.getBody().getContent().get(0);
+        assertThat(entity.containsKey("lastName")).isTrue();
+        assertThat(entity.get("lastName")).isEqualTo(user.getLastName());
+    }
+
+    @Test
+    public void getUsers_whenThereIsUserInDB_receiveUserWithEmail() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<TestPage<Map<String,Object>>> response = getUsers(new ParameterizedTypeReference<TestPage<Map<String,Object>>>() {});
+        Map<String,Object> entity = response.getBody().getContent().get(0);
+        assertThat(entity.containsKey("email")).isTrue();
+        assertThat(entity.get("email")).isEqualTo(user.getEmail());
+    }
+
+    @Test
+    public void getUsers_whenThereIsUserInDB_receiveUserWithUserId() {
+        userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<TestPage<Map<String,Object>>> response = getUsers(new ParameterizedTypeReference<TestPage<Map<String,Object>>>() {});
+        Map<String,Object> entity = response.getBody().getContent().get(0);
+        assertThat(entity.containsKey("userId")).isTrue();
     }
 
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {

@@ -18,7 +18,7 @@ public class TestPage<T> implements Page<T> {
     int numberOfElements;
     int size;
     boolean last;
-    boolean forst;
+    boolean first;
     boolean next;
     boolean previous;
 
@@ -26,37 +26,42 @@ public class TestPage<T> implements Page<T> {
 
     @Override
     public int getTotalPages() {
-        return 0;
+        return totalPages;
     }
 
     @Override
     public long getTotalElements() {
-        return 0;
+        return totalElements;
     }
 
     @Override
-    public int getNumber() {
-        return 0;
-    }
-
-    @Override
-    public int getSize() {
-        return 0;
-    }
-
-    @Override
-    public int getNumberOfElements() {
-        return 0;
-    }
-
-    @Override
-    public List<T> getContent() {
+    public <U> Page<U> map(Function<? super T, ? extends U> converter) {
         return null;
     }
 
     @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public int getSize() {
+        return size;
+    }
+
+    @Override
+    public int getNumberOfElements() {
+        return numberOfElements;
+    }
+
+    @Override
+    public List<T> getContent() {
+        return content;
+    }
+
+    @Override
     public boolean hasContent() {
-        return false;
+        return content != null;
     }
 
     @Override
@@ -66,12 +71,12 @@ public class TestPage<T> implements Page<T> {
 
     @Override
     public boolean isFirst() {
-        return false;
+        return first;
     }
 
     @Override
     public boolean isLast() {
-        return false;
+        return last;
     }
 
     @Override
@@ -91,11 +96,6 @@ public class TestPage<T> implements Page<T> {
 
     @Override
     public Pageable previousPageable() {
-        return null;
-    }
-
-    @Override
-    public <U> Page<U> map(Function<? super T, ? extends U> converter) {
         return null;
     }
 

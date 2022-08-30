@@ -61,9 +61,9 @@ public class UserService implements UserDetailsService {
         return new ModelMapper().map(user, UserDto.class);
     }
 
-
-    public Page<?> getUsers() {
+    public Page<UserDto> getUsers() {
+        ModelMapper modelMapper = new ModelMapper();
         Pageable pageable = PageRequest.of(0, 10);
-        return userRepo.findAll(pageable);
+        return userRepo.findAll(pageable).map(user -> modelMapper.map(user, UserDto.class));
     }
 }

@@ -4,6 +4,7 @@ import com.taras.arenda.Service.UserService;
 import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
 import com.taras.arenda.ui.model.CreateUserResponseModel;
+import com.taras.arenda.ui.model.UserResponseModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,8 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public Page<?> getUsers() {
-        return userService.getUsers();
+    public Page<UserResponseModel> getUsers() {
+        ModelMapper modelMapper = new ModelMapper();
+        return userService.getUsers().map(userDto -> modelMapper.map(userDto, UserResponseModel.class));
     }
 }
