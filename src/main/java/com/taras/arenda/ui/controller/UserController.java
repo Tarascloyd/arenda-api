@@ -7,6 +7,8 @@ import com.taras.arenda.ui.model.CreateUserResponseModel;
 import com.taras.arenda.ui.model.UserResponseModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
@@ -42,8 +44,9 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public Page<UserResponseModel> getUsers() {
+    public Page<UserResponseModel> getUsers(@PageableDefault(size = 10) Pageable page) {
         ModelMapper modelMapper = new ModelMapper();
-        return userService.getUsers().map(userDto -> modelMapper.map(userDto, UserResponseModel.class));
+        return userService.getUsers(page)
+                .map(userDto -> modelMapper.map(userDto, UserResponseModel.class));
     }
 }

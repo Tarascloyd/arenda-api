@@ -7,3 +7,7 @@ spring:
         persistence:
           validation:
             mode: none
+  data:
+    web:
+      pageable:
+        max-page-size: 100

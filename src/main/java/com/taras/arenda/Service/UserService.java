@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -61,9 +62,8 @@ public class UserService implements UserDetailsService {
         return new ModelMapper().map(user, UserDto.class);
     }
 
-    public Page<UserDto> getUsers() {
+    public Page<UserDto> getUsers(Pageable page) {
         ModelMapper modelMapper = new ModelMapper();
-        Pageable pageable = PageRequest.of(0, 10);
-        return userRepo.findAll(pageable).map(user -> modelMapper.map(user, UserDto.class));
+        return userRepo.findAll(page).map(user -> modelMapper.map(user, UserDto.class));
     }
 }

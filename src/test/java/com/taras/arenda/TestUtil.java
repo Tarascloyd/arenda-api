@@ -19,4 +19,11 @@ public class TestUtil {
         user.setPassword("Password99");
         return user;
     }
+
+    public static UserDto createValidUserDto(String email) {
+        CreateUserRequestModel user = createValidUser();
+        user.setEmail(email);
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(user, UserDto.class);
+    }
 }

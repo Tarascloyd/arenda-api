@@ -21,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -247,11 +248,52 @@ public class UserControllerTest {
         assertThat(entity.containsKey("userId")).isTrue();
     }
 
+    @Test
+    public void getUsers_whenPageIsRequestedFor3ItemsPerPageWhereTheDBHas20Users_receive3Users() {
+        IntStream.rangeClosed(1,20).mapToObj(i -> "aa" + i +"@gmail.com")
+                .map(TestUtil::createValidUserDto)
+                .forEach(userService::createUser);
+        String path = USERS_API_V1_URL + "?page=0&size=3";
+        ResponseEntity<TestPage<Object>> response = getUsers(path, new ParameterizedTypeReference<TestPage<Object>>() {});
+        assertThat(response.getBody().getContent().size()).isEqualTo(3);
+    }
+
+    @Test
+    public void getUsers_whenPageSizeNotProvided_receivePageSizeAs10() {
+        ResponseEntity<TestPage<Object>> response = getUsers(new ParameterizedTypeReference<TestPage<Object>>() {});
+        assertThat(response.getBody().getSize()).isEqualTo(10);
+    }
+
+    @Test
+    public void getUsers_whenPageSizeIsGreaterThan100_receivePageSizeAs100() {
+        String path = USERS_API_V1_URL + "?size=150";
+        ResponseEntity<TestPage<Object>> response = getUsers(path, new ParameterizedTypeReference<TestPage<Object>>() {});
+        assertThat(response.getBody().getSize()).isEqualTo(100);
+    }
+
+    @Test
+    public void getUsers_whenPageSizeIsNegative_receivePageSizeAs10() {
+        String path = USERS_API_V1_URL + "?size=-25";
+        ResponseEntity<TestPage<Object>> response = getUsers(path, new ParameterizedTypeReference<TestPage<Object>>() {});
+        assertThat(response.getBody().getSize()).isEqualTo(10);
+    }
+
+    @Test
+    public void getUsers_whenPageIsNegative_receiveFirstPage() {
+        String path = USERS_API_V1_URL + "?page=-2";
+        ResponseEntity<TestPage<Object>> response = getUsers(path, new ParameterizedTypeReference<TestPage<Object>>() {});
+        assertThat(response.getBody().getNumber()).isEqualTo(0);
+    }
+
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(USERS_API_V1_URL, request, response);
     }
 
     private <T> ResponseEntity<T> getUsers(ParameterizedTypeReference<T> responseType) {
         return testRestTemplate.exchange(USERS_API_V1_URL, HttpMethod.GET, null, responseType);
+    }
+
+    private <T> ResponseEntity<T> getUsers(String path, ParameterizedTypeReference<T> responseType) {
+        return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
     }
 }
