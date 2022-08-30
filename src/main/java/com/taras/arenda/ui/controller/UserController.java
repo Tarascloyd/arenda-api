@@ -5,6 +5,7 @@ import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
 import com.taras.arenda.ui.model.CreateUserResponseModel;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
@@ -28,8 +29,7 @@ public class UserController {
             consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
     )
-    public CreateUserResponseModel register(@Valid @RequestBody final CreateUserRequestModel userDetails)
-    {
+    public CreateUserResponseModel register(@Valid @RequestBody final CreateUserRequestModel userDetails) {
         ModelMapper modelMapper = new ModelMapper();
 
         UserDto userDto = modelMapper.map(userDetails, UserDto.class);
@@ -37,5 +37,11 @@ public class UserController {
         UserDto createdUser = userService.createUser(userDto);
 
         return modelMapper.map(createdUser, CreateUserResponseModel.class);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping
+    public Page<?> getUsers() {
+        return userService.getUsers();
     }
 }

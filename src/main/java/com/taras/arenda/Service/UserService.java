@@ -6,6 +6,9 @@ import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -56,5 +59,11 @@ public class UserService implements UserDetailsService {
                 });
 
         return new ModelMapper().map(user, UserDto.class);
+    }
+
+
+    public Page<?> getUsers() {
+        Pageable pageable = PageRequest.of(0, 10);
+        return userRepo.findAll(pageable);
     }
 }
