@@ -26,7 +26,10 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<Object> handleNotFoundException(Exception exception, WebRequest request){
         String resourceName = Optional.ofNullable(exception.getMessage()).orElse("");
         if (resourceName.length() > 1) resourceName += ":";
-        return new ResponseEntity<>(resourceName + "Resource Not Found", new HttpHeaders(), HttpStatus.NOT_FOUND);
+        ApiError apiError =
+                new ApiError(HttpStatus.NOT_FOUND, resourceName + "Resource Not Found", null);
+        return new ResponseEntity<>(
+                apiError, new HttpHeaders(), apiError.getStatus());
     }
 
     @Override

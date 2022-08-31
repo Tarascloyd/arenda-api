@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -285,6 +286,34 @@ public class UserControllerTest {
         assertThat(response.getBody().getNumber()).isEqualTo(0);
     }
 
+    @Test
+    public void getUserByEmail_whenUserExist_receiveOk() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<Object> response = getUser(user.getEmail(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void getUserByEmail_whenUserExist_receiveUserWithoutPassword() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<String> response = getUser(user.getEmail(), String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().contains("password")).isFalse();
+        assertThat(response.getBody().contains("encryptedPassword")).isFalse();
+    }
+
+    @Test
+    public void getUserByEmail_whenUserNotExist_receiveNotFound() {
+        ResponseEntity<Object> response = getUser("unknown@gg.com", Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void getUserByEmail_whenUserNotExist_receiveApiError() {
+        ResponseEntity<ApiError> response = getUser("unknown@gg.com", ApiError.class);
+        assertThat(response.getBody().getMessage().contains("Resource Not Found")).isTrue();
+    }
+
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(USERS_API_V1_URL, request, response);
     }
@@ -295,5 +324,10 @@ public class UserControllerTest {
 
     private <T> ResponseEntity<T> getUsers(String path, ParameterizedTypeReference<T> responseType) {
         return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
+    }
+
+    private <T> ResponseEntity<T> getUser(String email, Class<T> responseType) {
+        String path = USERS_API_V1_URL + "/" + email;
+        return testRestTemplate.getForEntity(path, responseType);
     }
 }

@@ -2,6 +2,7 @@ package com.taras.arenda.ui.controller;
 
 import com.taras.arenda.Service.UserService;
 import com.taras.arenda.dto.UserDto;
+import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
 import com.taras.arenda.ui.model.CreateUserResponseModel;
 import com.taras.arenda.ui.model.UserResponseModel;
@@ -48,5 +49,13 @@ public class UserController {
         ModelMapper modelMapper = new ModelMapper();
         return userService.getUsers(page)
                 .map(userDto -> modelMapper.map(userDto, UserResponseModel.class));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{email}")
+    public UserResponseModel getUserByEmail(@PathVariable String email) {
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = userService.getUserByEmail(email);
+        return modelMapper.map(userDto, UserResponseModel.class);
     }
 }

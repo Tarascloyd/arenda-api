@@ -55,10 +55,7 @@ public class UserService implements UserDetailsService {
 
     public UserDto getUserByEmail(String email) {
         User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> {
-                    throw new UsernameNotFoundException(email);
-                });
-
+                .orElseThrow(ResourceNotFoundException::new);
         return new ModelMapper().map(user, UserDto.class);
     }
 
