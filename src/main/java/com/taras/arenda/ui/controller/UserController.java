@@ -5,6 +5,7 @@ import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
 import com.taras.arenda.ui.model.CreateUserResponseModel;
+import com.taras.arenda.ui.model.UpdateUserRequestModel;
 import com.taras.arenda.ui.model.UserResponseModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -64,10 +65,10 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/{userId}")
     @PreAuthorize("#userId == principal")
-    public void updateUser(@PathVariable String userId,
-                           Authentication authentication
-                                            //,@Valid @RequestBody final UpdateUserRequestModel userDetails
-                                            ) {
-
+    public UserResponseModel updateUser(@PathVariable String userId,
+                           @Valid @RequestBody(required = false) final UpdateUserRequestModel userDetails) {
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = userService.updateUser(userId, modelMapper.map(userDetails, UserDto.class));
+        return modelMapper.map(userDto, UserResponseModel.class);
     }
 }

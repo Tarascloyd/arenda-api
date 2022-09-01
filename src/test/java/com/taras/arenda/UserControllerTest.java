@@ -7,6 +7,8 @@ import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
 import com.taras.arenda.ui.model.LoginRequestModel;
+import com.taras.arenda.ui.model.UpdateUserRequestModel;
+import com.taras.arenda.ui.model.UserResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -326,15 +328,9 @@ public class UserControllerTest {
     @Test
     public void patchUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveForbidden() {
         userService.createUser(TestUtil.createValidUserDto());
-        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
-        String token = response.getHeaders().get("token").get(0);
-        String id = "/random_id";
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(AUTHORIZATION_TOKEN_HEADER_NAME, AUTHORIZATION_TOKEN_HEADER_PREFIX + token);
-        HttpEntity<Object> request = new HttpEntity<>(headers);
-        ResponseEntity<Object> response2 = patchUser(id, request, Object.class);
-        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        HttpEntity<Object> request = getAuthorizedRequest(null);
+        ResponseEntity<Object> response = patchUser("/random_id", request, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -347,15 +343,97 @@ public class UserControllerTest {
     @Test
     public void patchUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveApiError() {
         userService.createUser(TestUtil.createValidUserDto());
-        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
-        String token = response.getHeaders().get("token").get(0);
-        String id = "/random_id";
+        HttpEntity<Object> request = getAuthorizedRequest(null);
+        ResponseEntity<ApiError> response = patchUser("/random_id", request, ApiError.class);
+        assertThat(response.getBody().getMessage()).isEqualTo("Access Denied");
+    }
+
+    @Test
+    public void patchUser_whenValidRequestBodyFromAuthorizedUser_receiveOk() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
+        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        ResponseEntity<Object> response = patchUser(user.getUserId(), request, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void patchUser_whenValidRequestBodyFromAuthorizedUser_lastNameUpdated() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
+        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        patchUser(user.getUserId(), request, Object.class);
+        User userInDB = userRepo.findByEmail(user.getEmail()).orElse(null);
+        assertThat(userInDB.getLastName()).isEqualTo(updatedUser.getLastName());
+    }
+
+    @Test
+    public void patchUser_whenValidRequestBodyFromAuthorizedUser_firstNameUpdated() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
+        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        patchUser(user.getUserId(), request, Object.class);
+        User userInDB = userRepo.findByEmail(user.getEmail()).orElse(null);
+        assertThat(userInDB.getFirstName()).isEqualTo(updatedUser.getFirstName());
+    }
+
+    @Test
+    public void patchUser_whenValidRequestBodyFromAuthorizedUser_recieveUserWithFirstNameUpdated() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
+        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        ResponseEntity<UserResponseModel> response = patchUser(user.getUserId(), request, UserResponseModel.class);
+        assertThat(response.getBody().getFirstName()).isEqualTo(updatedUser.getFirstName());
+    }
+
+    @Test
+    public void patchUser_whenValidRequestBodyFromAuthorizedUser_recieveUserWithLastNameUpdated() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
+        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        ResponseEntity<UserResponseModel> response = patchUser(user.getUserId(), request, UserResponseModel.class);
+        assertThat(response.getBody().getLastName()).isEqualTo(updatedUser.getLastName());
+    }
+
+    @Test
+    public void patchUser_whenInvalidRequestBodyLastIsNullFromAuthorizedUser_recieveBadRequest() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
+        updatedUser.setLastName(null);
+        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        ResponseEntity<Object> response = patchUser(user.getUserId(), request, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void patchUser_whenInvalidRequestBodyLastNameIsLessThanRequiredFromAuthorizedUser_recieveBadRequest() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
+        updatedUser.setLastName("a");
+        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        ResponseEntity<Object> response = patchUser(user.getUserId(), request, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+
+    private UpdateUserRequestModel createValidUpdateUserRM() {
+        UpdateUserRequestModel updatedUser = new UpdateUserRequestModel();
+        updatedUser.setFirstName("Marcus");
+        updatedUser.setLastName("Black");
+        return updatedUser;
+    }
+
+    private <T> HttpEntity<T> getAuthorizedRequest(T body) {
+        String token = authenticateUser();
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_TOKEN_HEADER_NAME, AUTHORIZATION_TOKEN_HEADER_PREFIX + token);
-        HttpEntity<Object> request = new HttpEntity<>(headers);
-        ResponseEntity<ApiError> response2 = patchUser(id, request, ApiError.class);
-        assertThat(response2.getBody().getMessage()).isEqualTo("Access Denied");
+        return new HttpEntity<>(body, headers);
+    }
+
+    private String authenticateUser() {
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
+        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        return response.getHeaders().get("token").get(0);
     }
 
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {

@@ -63,4 +63,14 @@ public class UserService implements UserDetailsService {
         ModelMapper modelMapper = new ModelMapper();
         return userRepo.findAll(page).map(user -> modelMapper.map(user, UserDto.class));
     }
+
+    public UserDto updateUser(String userId, UserDto updatedUser) {
+        ModelMapper modelMapper = new ModelMapper();
+        User userInDB = userRepo.findByUserId(userId)
+                .orElseThrow(ResourceNotFoundException::new);
+        userInDB.setFirstName(updatedUser.getFirstName());
+        userInDB.setLastName(updatedUser.getLastName());
+        User savedUser = userRepo.save(userInDB);
+        return modelMapper.map(savedUser, UserDto.class);
+    }
 }
