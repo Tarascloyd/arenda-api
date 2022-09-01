@@ -2,6 +2,7 @@ package com.taras.arenda;
 
 import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
+import com.taras.arenda.ui.model.LoginRequestModel;
 import org.modelmapper.ModelMapper;
 
 public class TestUtil {
@@ -15,6 +16,13 @@ public class TestUtil {
         CreateUserRequestModel user = new CreateUserRequestModel();
         user.setFirstName("Mark");
         user.setLastName("Mailer");
+        user.setEmail("aa@gmail.com");
+        user.setPassword("Password99");
+        return user;
+    }
+
+    public static LoginRequestModel createLoginRequestModel() {
+        LoginRequestModel user = new LoginRequestModel();
         user.setEmail("aa@gmail.com");
         user.setPassword("Password99");
         return user;

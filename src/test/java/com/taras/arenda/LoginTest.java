@@ -47,7 +47,7 @@ public class LoginTest {
 
     @Test
     public void postLogin_withIncorrectCredentials_receiveUnauthorized() {
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<Object> response = postLogin(loginModel, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
@@ -55,7 +55,7 @@ public class LoginTest {
     @Test
     public void postLogin_withValidCredentials_receiveOk() {
         userService.createUser(TestUtil.createValidUserDto());
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<Object> response = postLogin(loginModel, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -63,7 +63,7 @@ public class LoginTest {
     @Test
     public void postLogin_withValidCredentials_receiveNullBody() {
         userService.createUser(TestUtil.createValidUserDto());
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<Object> response = postLogin(loginModel, Object.class);
         assertThat(response.getBody()).isNull();
     }
@@ -71,7 +71,7 @@ public class LoginTest {
     @Test
     public void postLogin_withValidCredentials_receiveHeaderToken() {
         userService.createUser(TestUtil.createValidUserDto());
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<Object> response = postLogin(loginModel, Object.class);
         assertThat(response.getHeaders().get("token").get(0)).isNotNull();
     }
@@ -79,7 +79,7 @@ public class LoginTest {
     @Test
     public void postLogin_withValidCredentials_receiveUserIdToken() {
         UserDto savedUser = userService.createUser(TestUtil.createValidUserDto());
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<Object> response = postLogin(loginModel, Object.class);
         assertThat(response.getHeaders().get("userId").get(0)).isEqualTo(savedUser.getUserId());
     }
@@ -92,7 +92,7 @@ public class LoginTest {
 
     @Test
     public void postLogin_withIncorrectCredentials_receiveApiError() {
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<ApiError> response = postLogin(loginModel, ApiError.class);
         assertThat(response.getBody().getStatus()).isNotNull();
     }
@@ -105,7 +105,7 @@ public class LoginTest {
 
     @Test
     public void postLogin_withIncorrectCredentials_receiveErrorMessage() {
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<ApiError> response = postLogin(loginModel, ApiError.class);
         assertThat(response.getBody().getMessage()).isEqualTo("Access Error");
     }
@@ -118,27 +118,16 @@ public class LoginTest {
 
     @Test
     public void postLogin_withIncorrectCredentials_receiveUnauthorizedWithoutWWWAuthenticationHeader() {
-        LoginRequestModel loginModel = createLoginRequestModel();
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
         ResponseEntity<Object> response = postLogin(loginModel, Object.class);
         assertThat(response.getHeaders().containsKey("WWW-Authenticate")).isFalse();
     }
 
-    private void authenticate() {
-        testRestTemplate.getRestTemplate().getInterceptors().add(
-                new BasicAuthenticationInterceptor("test_user", "P4sssword"));
-    }
     private <T> ResponseEntity<T> login(Class<T> responseType) {
         return testRestTemplate.postForEntity(LOGIN_API_V1_URL, null, responseType);
     }
 
     private <T> ResponseEntity<T> postLogin(Object request, Class<T> responseType) {
         return testRestTemplate.postForEntity(LOGIN_API_V1_URL, request, responseType);
-    }
-
-    private LoginRequestModel createLoginRequestModel() {
-        LoginRequestModel user = new LoginRequestModel();
-        user.setEmail("aa@gmail.com");
-        user.setPassword("Password99");
-        return user;
     }
 }

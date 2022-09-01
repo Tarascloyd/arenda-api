@@ -6,6 +6,7 @@ import com.taras.arenda.exceptions.ApiError;
 import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
 import com.taras.arenda.ui.model.CreateUserRequestModel;
+import com.taras.arenda.ui.model.LoginRequestModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -14,9 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
@@ -31,6 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserControllerTest {
 
     private static final String USERS_API_V1_URL = "/api/v1/users";
+    private static final String LOGIN_API_V1_URL = "/api/v1/users/login";
+    private static final String AUTHORIZATION_TOKEN_HEADER_NAME = "Authorization";
+    private static final String AUTHORIZATION_TOKEN_HEADER_PREFIX = "Bearer";
     @Autowired
     private TestRestTemplate testRestTemplate;
     @Autowired
@@ -314,6 +316,48 @@ public class UserControllerTest {
         assertThat(response.getBody().getMessage().contains("Resource Not Found")).isTrue();
     }
 
+    @Test
+    public void patchUser_whenUnauthorizedUserSendsRequest_receiveUnauthorized() {
+        String id = "/random_id";
+        ResponseEntity<Object> response = patchUser(id, null, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void patchUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveForbidden() {
+        userService.createUser(TestUtil.createValidUserDto());
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
+        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        String token = response.getHeaders().get("token").get(0);
+        String id = "/random_id";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(AUTHORIZATION_TOKEN_HEADER_NAME, AUTHORIZATION_TOKEN_HEADER_PREFIX + token);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+        ResponseEntity<Object> response2 = patchUser(id, request, Object.class);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void patchUser_whenUnauthorizedUserSendsRequest_receiveApiError() {
+        String id = "/random_id";
+        ResponseEntity<ApiError> response = patchUser(id, null, ApiError.class);
+        assertThat(response.getBody().getMessage()).isEqualTo("Access Error");
+    }
+
+    @Test
+    public void patchUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveApiError() {
+        userService.createUser(TestUtil.createValidUserDto());
+        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
+        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        String token = response.getHeaders().get("token").get(0);
+        String id = "/random_id";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(AUTHORIZATION_TOKEN_HEADER_NAME, AUTHORIZATION_TOKEN_HEADER_PREFIX + token);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+        ResponseEntity<ApiError> response2 = patchUser(id, request, ApiError.class);
+        assertThat(response2.getBody().getMessage()).isEqualTo("Access Denied");
+    }
+
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(USERS_API_V1_URL, request, response);
     }
@@ -329,5 +373,14 @@ public class UserControllerTest {
     private <T> ResponseEntity<T> getUser(String email, Class<T> responseType) {
         String path = USERS_API_V1_URL + "/" + email;
         return testRestTemplate.getForEntity(path, responseType);
+    }
+
+    private <T> ResponseEntity<T> patchUser(String id, HttpEntity<?> requestEntity, Class<T> responseType) {
+        String path = USERS_API_V1_URL + "/" + id;
+        return testRestTemplate.exchange(path, HttpMethod.PATCH, requestEntity, responseType);
+    }
+
+    private <T> ResponseEntity<T> postLogin(Object request, Class<T> responseType) {
+        return testRestTemplate.postForEntity(LOGIN_API_V1_URL, request, responseType);
     }
 }
