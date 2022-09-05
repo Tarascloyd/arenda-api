@@ -35,6 +35,21 @@ public class UserRepositoryTest {
         assertThat(inDb).isNull();
     }
 
+    @Test
+    public void findByUserId_whenUserExist_returnsUser() {
+        User user = createValidUser();
+        testEntityManager.persist(user);
+
+        User inDb = userRepo.findByUserId(user.getUserId()).orElse(null);
+        assertThat(inDb).isNotNull();
+    }
+
+    @Test
+    public void findByUserId_whenUserDoesNotExist_returnsNull() {
+        User inDb = userRepo.findByUserId("random_id").orElse(null);
+        assertThat(inDb).isNull();
+    }
+
     private User createValidUser() {
         User user = new User();
         user.setFirstName("Mark");
