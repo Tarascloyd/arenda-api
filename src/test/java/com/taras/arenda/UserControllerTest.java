@@ -237,12 +237,11 @@ public class UserControllerTest {
     }
 
     @Test
-    public void getUsers_whenThereIsUserInDB_receiveUserWithEmail() {
-        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+    public void getUsers_whenThereIsUserInDB_receiveUserWithoutEmail() {
+        userService.createUser(TestUtil.createValidUserDto());
         ResponseEntity<TestPage<Map<String,Object>>> response = getUsers(new ParameterizedTypeReference<TestPage<Map<String,Object>>>() {});
         Map<String,Object> entity = response.getBody().getContent().get(0);
-        assertThat(entity.containsKey("email")).isTrue();
-        assertThat(entity.get("email")).isEqualTo(user.getEmail());
+        assertThat(entity.containsKey("email")).isFalse();
     }
 
     @Test
@@ -307,6 +306,24 @@ public class UserControllerTest {
     }
 
     @Test
+    public void getUser_whenUserExist_receiveUserWithoutEmail() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<String> response = getUser(user.getUserId(), String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().contains("email")).isFalse();
+    }
+
+    @Test
+    public void getUser_whenUserExist_receiveUserWithFirstName() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<Map<String,Object>> response = getUser(user.getUserId(),new ParameterizedTypeReference<Map<String,Object>>() {});
+        Map<String,Object> entity = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.containsKey("firstName")).isTrue();
+        assertThat(entity.get("firstName")).isEqualTo(user.getFirstName());
+    }
+
+    @Test
     public void getUser_whenUserNotExist_receiveNotFound() {
         ResponseEntity<Object> response = getUser("random_id", Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -319,31 +336,62 @@ public class UserControllerTest {
     }
 
     @Test
-    public void getUserByEmail_whenUserExist_receiveOk() {
+    public void getUserByEmail_whenUnauthorizedUserSendsRequest_receiveUnauthorized() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         ResponseEntity<Object> response = getUserByEmail(user.getEmail(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void getUserByEmail_whenAuthorizedUserSendsRequestForAnotherUser_receiveForbidden() {
+        userService.createUser(TestUtil.createValidUserDto());
+        HttpEntity<Object> request = getAuthorizedRequest(null);
+        ResponseEntity<Object> response = getUserByEmail("/unknown@gg.com", request, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void getUserByEmail_whenUnauthorizedUserSendsRequest_receiveApiError() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        ResponseEntity<ApiError> response = getUserByEmail(user.getEmail(), ApiError.class);
+        assertThat(response.getBody().getMessage()).isEqualTo("Access Error");
+    }
+
+    @Test
+    public void getUserByEmail_whenAuthorizedUserSendsRequestForAnotherUser_receiveApiError() {
+        userService.createUser(TestUtil.createValidUserDto());
+        HttpEntity<Object> request = getAuthorizedRequest(null);
+        ResponseEntity<ApiError> response = getUserByEmail("/unknown@gg.com", request, ApiError.class);
+        assertThat(response.getBody().getMessage()).isEqualTo("Access Denied");
+    }
+
+    @Test
+    public void getUserByEmail_whenAuthorizedUserSendsRequestForSelf_receiveOk() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        HttpEntity<Object> request = getAuthorizedRequest(null);
+        ResponseEntity<Object> response = getUserByEmail(user.getEmail(), request, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
-    public void getUserByEmail_whenUserExist_receiveUserWithoutPassword() {
+    public void getUserByEmail_whenAuthorizedUserSendsRequestForSelf_receiveUserWithoutPassword() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
-        ResponseEntity<String> response = getUserByEmail(user.getEmail(), String.class);
+        HttpEntity<Object> request = getAuthorizedRequest(null);
+        ResponseEntity<String> response = getUserByEmail(user.getEmail(), request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().contains("password")).isFalse();
         assertThat(response.getBody().contains("encryptedPassword")).isFalse();
     }
 
     @Test
-    public void getUserByEmail_whenUserNotExist_receiveNotFound() {
-        ResponseEntity<Object> response = getUserByEmail("unknown@gg.com", Object.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    public void getUserByEmail_whenUserNotExist_receiveApiError() {
-        ResponseEntity<ApiError> response = getUserByEmail("unknown@gg.com", ApiError.class);
-        assertThat(response.getBody().getMessage().contains("Resource Not Found")).isTrue();
+    public void getUserByEmail_whenAuthorizedUserSendsRequestForSelf_receiveUserWithEmail() {
+        UserDto user = userService.createUser(TestUtil.createValidUserDto());
+        HttpEntity<Object> request = getAuthorizedRequest(null);
+        ResponseEntity<Map<String,Object>> response = getUserByEmail(user.getEmail(), request, new ParameterizedTypeReference<Map<String,Object>>() {});
+        Map<String,Object> entity = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.containsKey("email")).isTrue();
+        assertThat(entity.get("email")).isEqualTo(user.getEmail());
     }
 
     @Test
@@ -481,9 +529,24 @@ public class UserControllerTest {
         return testRestTemplate.getForEntity(path, responseType);
     }
 
+    private <T> ResponseEntity<T> getUser(String email, ParameterizedTypeReference<T> responseType) {
+        String path = USERS_API_V1_URL + "/" + email;
+        return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
+    }
+
     private <T> ResponseEntity<T> getUserByEmail(String email, Class<T> responseType) {
         String path = USERS_API_V1_URL + "/email/" + email;
         return testRestTemplate.getForEntity(path, responseType);
+    }
+
+    private <T> ResponseEntity<T> getUserByEmail(String email, HttpEntity<?> requestEntity, Class<T> responseType) {
+        String path = USERS_API_V1_URL + "/email/" + email;
+        return testRestTemplate.exchange(path, HttpMethod.GET, requestEntity, responseType);
+    }
+
+    private <T> ResponseEntity<T> getUserByEmail(String email, HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType) {
+        String path = USERS_API_V1_URL + "/email/" + email;
+        return testRestTemplate.exchange(path, HttpMethod.GET, requestEntity, responseType);
     }
 
     private <T> ResponseEntity<T> patchUser(String id, HttpEntity<?> requestEntity, Class<T> responseType) {

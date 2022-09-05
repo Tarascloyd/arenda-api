@@ -29,7 +29,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.httpBasic();
-        http.authorizeRequests().antMatchers(HttpMethod.POST, USERS_URL_PATH).permitAll()
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/v1/users/email/{email}").authenticated()
+                .antMatchers(HttpMethod.POST, USERS_URL_PATH).permitAll()
                 .antMatchers(HttpMethod.GET, USERS_URL_PATH).permitAll()
                 .antMatchers("/**").authenticated()
                 .and()

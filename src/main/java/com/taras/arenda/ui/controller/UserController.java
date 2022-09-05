@@ -3,10 +3,7 @@ package com.taras.arenda.ui.controller;
 import com.taras.arenda.Service.UserService;
 import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.jpa.entity.User;
-import com.taras.arenda.ui.model.CreateUserRequestModel;
-import com.taras.arenda.ui.model.CreateUserResponseModel;
-import com.taras.arenda.ui.model.UpdateUserRequestModel;
-import com.taras.arenda.ui.model.UserResponseModel;
+import com.taras.arenda.ui.model.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @CrossOrigin
 @RestController
@@ -48,23 +46,24 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public Page<UserResponseModel> getUsers(@PageableDefault(size = 10) Pageable page) {
+    public Page<PublicUserResponseModel> getUsers(@PageableDefault(size = 10) Pageable page) {
         ModelMapper modelMapper = new ModelMapper();
         return userService.getUsers(page)
-                .map(userDto -> modelMapper.map(userDto, UserResponseModel.class));
+                .map(userDto -> modelMapper.map(userDto, PublicUserResponseModel.class));
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{userId}")
-    public UserResponseModel getUser(@PathVariable String userId) {
+    public PublicUserResponseModel getUser(@PathVariable String userId) {
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = userService.getUser(userId);
-        return modelMapper.map(userDto, UserResponseModel.class);
+        return modelMapper.map(userDto, PublicUserResponseModel.class);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/email/{email}")
-    public UserResponseModel getUserByEmail(@PathVariable String email) {
+    public UserResponseModel getUserByEmail(@PathVariable String email, Principal pricncipal) {
+        userService.isCurrentUser(email, pricncipal.getName());
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = userService.getUserByEmail(email);
         return modelMapper.map(userDto, UserResponseModel.class);

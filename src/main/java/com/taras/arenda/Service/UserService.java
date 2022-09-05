@@ -1,21 +1,19 @@
 package com.taras.arenda.Service;
 
 import com.taras.arenda.dto.UserDto;
+import com.taras.arenda.exceptions.AccessDeniedException;
 import com.taras.arenda.exceptions.ResourceNotFoundException;
 import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -78,5 +76,13 @@ public class UserService implements UserDetailsService {
         userInDB.setLastName(updatedUser.getLastName());
         User savedUser = userRepo.save(userInDB);
         return modelMapper.map(savedUser, UserDto.class);
+    }
+
+    public boolean isCurrentUser(String email, String userId) {
+        UserDto loggedUser = getUser(userId);
+        if (!loggedUser.getEmail().equals(email)) {
+            throw new AccessDeniedException();
+        }
+        return true;
     }
 }
