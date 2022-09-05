@@ -59,6 +59,12 @@ public class UserService implements UserDetailsService {
         return new ModelMapper().map(user, UserDto.class);
     }
 
+    public UserDto getUser(String userId) {
+        User user = userRepo.findByUserId(userId)
+                .orElseThrow(ResourceNotFoundException::new);
+        return new ModelMapper().map(user, UserDto.class);
+    }
+
     public Page<UserDto> getUsers(Pageable page) {
         ModelMapper modelMapper = new ModelMapper();
         return userRepo.findAll(page).map(user -> modelMapper.map(user, UserDto.class));

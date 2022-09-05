@@ -55,7 +55,15 @@ public class UserController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/{email}")
+    @GetMapping("/{userId}")
+    public UserResponseModel getUser(@PathVariable String userId) {
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = userService.getUser(userId);
+        return modelMapper.map(userDto, UserResponseModel.class);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/email/{email}")
     public UserResponseModel getUserByEmail(@PathVariable String email) {
         ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = userService.getUserByEmail(email);
