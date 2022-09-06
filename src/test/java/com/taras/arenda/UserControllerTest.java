@@ -5,26 +5,22 @@ import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.exceptions.ApiError;
 import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
-import com.taras.arenda.ui.model.CreateUserRequestModel;
-import com.taras.arenda.ui.model.LoginRequestModel;
-import com.taras.arenda.ui.model.UpdateUserRequestModel;
-import com.taras.arenda.ui.model.UserResponseModel;
+import com.taras.arenda.ui.model.user.CreateUserRequestModel;
+import com.taras.arenda.ui.model.user.LoginRequestModel;
+import com.taras.arenda.ui.model.user.UpdateUserRequestModel;
+import com.taras.arenda.ui.model.user.UserResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,14 +29,16 @@ public class UserControllerTest {
 
     private static final String USERS_API_V1_URL = "/api/v1/users";
     private static final String LOGIN_API_V1_URL = "/api/v1/users/login";
-    private static final String AUTHORIZATION_TOKEN_HEADER_NAME = "Authorization";
-    private static final String AUTHORIZATION_TOKEN_HEADER_PREFIX = "Bearer";
+
     @Autowired
     private TestRestTemplate testRestTemplate;
     @Autowired
     private UserRepository userRepo;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TestUtil testUtil;
 
     @BeforeEach
     public void cleanup() {
@@ -345,7 +343,7 @@ public class UserControllerTest {
     @Test
     public void getUserByEmail_whenAuthorizedUserSendsRequestForAnotherUser_receiveForbidden() {
         userService.createUser(TestUtil.createValidUserDto());
-        HttpEntity<Object> request = getAuthorizedRequest(null);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
         ResponseEntity<Object> response = getUserByEmail("/unknown@gg.com", request, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -360,7 +358,7 @@ public class UserControllerTest {
     @Test
     public void getUserByEmail_whenAuthorizedUserSendsRequestForAnotherUser_receiveApiError() {
         userService.createUser(TestUtil.createValidUserDto());
-        HttpEntity<Object> request = getAuthorizedRequest(null);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
         ResponseEntity<ApiError> response = getUserByEmail("/unknown@gg.com", request, ApiError.class);
         assertThat(response.getBody().getMessage()).isEqualTo("Access Denied");
     }
@@ -368,7 +366,7 @@ public class UserControllerTest {
     @Test
     public void getUserByEmail_whenAuthorizedUserSendsRequestForSelf_receiveOk() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
-        HttpEntity<Object> request = getAuthorizedRequest(null);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
         ResponseEntity<Object> response = getUserByEmail(user.getEmail(), request, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -376,7 +374,7 @@ public class UserControllerTest {
     @Test
     public void getUserByEmail_whenAuthorizedUserSendsRequestForSelf_receiveUserWithoutPassword() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
-        HttpEntity<Object> request = getAuthorizedRequest(null);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
         ResponseEntity<String> response = getUserByEmail(user.getEmail(), request, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().contains("password")).isFalse();
@@ -386,7 +384,7 @@ public class UserControllerTest {
     @Test
     public void getUserByEmail_whenAuthorizedUserSendsRequestForSelf_receiveUserWithEmail() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
-        HttpEntity<Object> request = getAuthorizedRequest(null);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
         ResponseEntity<Map<String,Object>> response = getUserByEmail(user.getEmail(), request, new ParameterizedTypeReference<Map<String,Object>>() {});
         Map<String,Object> entity = response.getBody();
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -404,7 +402,7 @@ public class UserControllerTest {
     @Test
     public void patchUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveForbidden() {
         userService.createUser(TestUtil.createValidUserDto());
-        HttpEntity<Object> request = getAuthorizedRequest(null);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
         ResponseEntity<Object> response = patchUser("/random_id", request, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
@@ -419,7 +417,7 @@ public class UserControllerTest {
     @Test
     public void patchUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveApiError() {
         userService.createUser(TestUtil.createValidUserDto());
-        HttpEntity<Object> request = getAuthorizedRequest(null);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
         ResponseEntity<ApiError> response = patchUser("/random_id", request, ApiError.class);
         assertThat(response.getBody().getMessage()).isEqualTo("Access Denied");
     }
@@ -428,7 +426,7 @@ public class UserControllerTest {
     public void patchUser_whenValidRequestBodyFromAuthorizedUser_receiveOk() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
-        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
         ResponseEntity<Object> response = patchUser(user.getUserId(), request, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -437,7 +435,7 @@ public class UserControllerTest {
     public void patchUser_whenValidRequestBodyFromAuthorizedUser_lastNameUpdated() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
-        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
         patchUser(user.getUserId(), request, Object.class);
         User userInDB = userRepo.findByEmail(user.getEmail()).orElse(null);
         assertThat(userInDB.getLastName()).isEqualTo(updatedUser.getLastName());
@@ -447,7 +445,7 @@ public class UserControllerTest {
     public void patchUser_whenValidRequestBodyFromAuthorizedUser_firstNameUpdated() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
-        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
         patchUser(user.getUserId(), request, Object.class);
         User userInDB = userRepo.findByEmail(user.getEmail()).orElse(null);
         assertThat(userInDB.getFirstName()).isEqualTo(updatedUser.getFirstName());
@@ -457,7 +455,7 @@ public class UserControllerTest {
     public void patchUser_whenValidRequestBodyFromAuthorizedUser_recieveUserWithFirstNameUpdated() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
-        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
         ResponseEntity<UserResponseModel> response = patchUser(user.getUserId(), request, UserResponseModel.class);
         assertThat(response.getBody().getFirstName()).isEqualTo(updatedUser.getFirstName());
     }
@@ -466,7 +464,7 @@ public class UserControllerTest {
     public void patchUser_whenValidRequestBodyFromAuthorizedUser_recieveUserWithLastNameUpdated() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
-        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
         ResponseEntity<UserResponseModel> response = patchUser(user.getUserId(), request, UserResponseModel.class);
         assertThat(response.getBody().getLastName()).isEqualTo(updatedUser.getLastName());
     }
@@ -476,7 +474,7 @@ public class UserControllerTest {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
         updatedUser.setLastName(null);
-        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
         ResponseEntity<Object> response = patchUser(user.getUserId(), request, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -486,7 +484,7 @@ public class UserControllerTest {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
         updatedUser.setLastName("a");
-        HttpEntity<UpdateUserRequestModel> request = getAuthorizedRequest(updatedUser);
+        HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
         ResponseEntity<Object> response = patchUser(user.getUserId(), request, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -497,19 +495,6 @@ public class UserControllerTest {
         updatedUser.setFirstName("Marcus");
         updatedUser.setLastName("Black");
         return updatedUser;
-    }
-
-    private <T> HttpEntity<T> getAuthorizedRequest(T body) {
-        String token = authenticateUser();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(AUTHORIZATION_TOKEN_HEADER_NAME, AUTHORIZATION_TOKEN_HEADER_PREFIX + token);
-        return new HttpEntity<>(body, headers);
-    }
-
-    private String authenticateUser() {
-        LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
-        return response.getHeaders().get("token").get(0);
     }
 
     private <T> ResponseEntity<T> postSignup(Object request, Class<T> response) {
@@ -552,9 +537,5 @@ public class UserControllerTest {
     private <T> ResponseEntity<T> patchUser(String id, HttpEntity<?> requestEntity, Class<T> responseType) {
         String path = USERS_API_V1_URL + "/" + id;
         return testRestTemplate.exchange(path, HttpMethod.PATCH, requestEntity, responseType);
-    }
-
-    private <T> ResponseEntity<T> postLogin(Object request, Class<T> responseType) {
-        return testRestTemplate.postForEntity(LOGIN_API_V1_URL, request, responseType);
     }
 }

@@ -1,4 +1,4 @@
-package com.taras.arenda.ui.model;
+package com.taras.arenda.ui.model.roomtype;
 
 import com.taras.arenda.jpa.entity.Hotel;
 import lombok.Data;

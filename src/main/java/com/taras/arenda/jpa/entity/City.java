@@ -24,6 +24,9 @@ public class City implements Serializable, Comparable<City> {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "CITY_ID")
+    private String cityId;
+
     @Column(name = "NAME")
     private String name;
 

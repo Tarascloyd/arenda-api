@@ -1,4 +1,4 @@
-package com.taras.arenda.ui.model;
+package com.taras.arenda.ui.model.user;
 
 import com.taras.arenda.ui.validation.UniqueEmail;
 import lombok.Data;

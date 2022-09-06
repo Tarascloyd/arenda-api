@@ -1,9 +1,9 @@
-package com.taras.arenda.ui.model;
+package com.taras.arenda.ui.model.user;
 
 import lombok.Data;
 
 @Data
-public class CreateUserResponseModel {
+public class UserResponseModel {
 
     private String firstName;
 

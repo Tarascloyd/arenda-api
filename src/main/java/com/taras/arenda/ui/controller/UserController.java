@@ -2,8 +2,7 @@ package com.taras.arenda.ui.controller;
 
 import com.taras.arenda.Service.UserService;
 import com.taras.arenda.dto.UserDto;
-import com.taras.arenda.jpa.entity.User;
-import com.taras.arenda.ui.model.*;
+import com.taras.arenda.ui.model.user.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,8 +10,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

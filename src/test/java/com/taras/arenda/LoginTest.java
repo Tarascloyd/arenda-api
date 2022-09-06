@@ -3,22 +3,16 @@ package com.taras.arenda;
 import com.taras.arenda.Service.UserService;
 import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.exceptions.ApiError;
-import com.taras.arenda.jpa.entity.User;
 import com.taras.arenda.jpa.repository.UserRepository;
-import com.taras.arenda.ui.model.CreateUserRequestModel;
-import com.taras.arenda.ui.model.LoginRequestModel;
+import com.taras.arenda.ui.model.user.LoginRequestModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,6 +28,9 @@ public class LoginTest {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TestUtil testUtil;
+
     @BeforeEach
     public void cleanup() {
         userRepo.deleteAll();
@@ -48,7 +45,7 @@ public class LoginTest {
     @Test
     public void postLogin_withIncorrectCredentials_receiveUnauthorized() {
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        ResponseEntity<Object> response = testUtil.postLogin(loginModel, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
@@ -56,7 +53,7 @@ public class LoginTest {
     public void postLogin_withValidCredentials_receiveOk() {
         userService.createUser(TestUtil.createValidUserDto());
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        ResponseEntity<Object> response = testUtil.postLogin(loginModel, Object.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -64,7 +61,7 @@ public class LoginTest {
     public void postLogin_withValidCredentials_receiveNullBody() {
         userService.createUser(TestUtil.createValidUserDto());
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        ResponseEntity<Object> response = testUtil.postLogin(loginModel, Object.class);
         assertThat(response.getBody()).isNull();
     }
 
@@ -72,7 +69,7 @@ public class LoginTest {
     public void postLogin_withValidCredentials_receiveHeaderToken() {
         userService.createUser(TestUtil.createValidUserDto());
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        ResponseEntity<Object> response = testUtil.postLogin(loginModel, Object.class);
         assertThat(response.getHeaders().get("token").get(0)).isNotNull();
     }
 
@@ -80,7 +77,7 @@ public class LoginTest {
     public void postLogin_withValidCredentials_receiveUserIdToken() {
         UserDto savedUser = userService.createUser(TestUtil.createValidUserDto());
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        ResponseEntity<Object> response = testUtil.postLogin(loginModel, Object.class);
         assertThat(response.getHeaders().get("userId").get(0)).isEqualTo(savedUser.getUserId());
     }
 
@@ -93,7 +90,7 @@ public class LoginTest {
     @Test
     public void postLogin_withIncorrectCredentials_receiveApiError() {
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<ApiError> response = postLogin(loginModel, ApiError.class);
+        ResponseEntity<ApiError> response = testUtil.postLogin(loginModel, ApiError.class);
         assertThat(response.getBody().getStatus()).isNotNull();
     }
 
@@ -106,7 +103,7 @@ public class LoginTest {
     @Test
     public void postLogin_withIncorrectCredentials_receiveErrorMessage() {
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<ApiError> response = postLogin(loginModel, ApiError.class);
+        ResponseEntity<ApiError> response = testUtil.postLogin(loginModel, ApiError.class);
         assertThat(response.getBody().getMessage()).isEqualTo("Access Error");
     }
 
@@ -119,15 +116,11 @@ public class LoginTest {
     @Test
     public void postLogin_withIncorrectCredentials_receiveUnauthorizedWithoutWWWAuthenticationHeader() {
         LoginRequestModel loginModel = TestUtil.createLoginRequestModel();
-        ResponseEntity<Object> response = postLogin(loginModel, Object.class);
+        ResponseEntity<Object> response = testUtil.postLogin(loginModel, Object.class);
         assertThat(response.getHeaders().containsKey("WWW-Authenticate")).isFalse();
     }
 
     private <T> ResponseEntity<T> login(Class<T> responseType) {
         return testRestTemplate.postForEntity(LOGIN_API_V1_URL, null, responseType);
-    }
-
-    private <T> ResponseEntity<T> postLogin(Object request, Class<T> responseType) {
-        return testRestTemplate.postForEntity(LOGIN_API_V1_URL, request, responseType);
     }
 }

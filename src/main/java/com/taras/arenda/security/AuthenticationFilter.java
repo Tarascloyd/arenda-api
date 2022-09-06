@@ -3,7 +3,7 @@ package com.taras.arenda.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taras.arenda.Service.UserService;
 import com.taras.arenda.dto.UserDto;
-import com.taras.arenda.ui.model.LoginRequestModel;
+import com.taras.arenda.ui.model.user.LoginRequestModel;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
