@@ -20,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private static final String USERS_URL_PATH = "/api/v1/users/**";
+
+    private static final String CITIES_URL_PATH = "/api/v1/cities";
     private static final String LOGIN_URL_PATH = "/api/v1/users/login";
 
     private final UserService userService;
@@ -32,6 +34,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/v1/users/email/{email}").authenticated()
                 .antMatchers(HttpMethod.POST, USERS_URL_PATH).permitAll()
                 .antMatchers(HttpMethod.GET, USERS_URL_PATH).permitAll()
+                .antMatchers(HttpMethod.GET, CITIES_URL_PATH).permitAll()
                 .antMatchers("/**").authenticated()
                 .and()
                 .addFilter(getAuthenticationFilter())

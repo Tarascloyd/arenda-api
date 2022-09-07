@@ -9,12 +9,13 @@ import com.taras.arenda.jpa.entity.RoomType;
 import com.taras.arenda.jpa.repository.CityRepository;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
+import com.taras.arenda.ui.model.city.CityResponseModel;
 import com.taras.arenda.ui.model.city.CreateCityRequestModel;
 import com.taras.arenda.ui.model.city.CreateCityResponseModel;
-import com.taras.arenda.ui.model.user.CreateUserRequestModel;
-import com.taras.arenda.ui.model.user.CreateUserResponseModel;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -39,24 +40,18 @@ public class CityController {
     private final CityService cityService;
 
     @GetMapping({"/", ""})
-    public Iterable<City> getAllCitiesOrSearch(
-            @RequestParam(name = "name", required = false) String name) {
-        if (name == null || name.trim().isEmpty()) {
-            return cityService.findAll();
-        }
-        return cityService.findByName(name);
+    public Page<CityResponseModel> getAllCitiesOrSearch(
+            @RequestParam(name = "name", required = false) String name,
+            Pageable page) {
+        ModelMapper modelMapper = new ModelMapper();
+        return cityService.findByName(name, page)
+                .map(userDto -> modelMapper.map(userDto, CityResponseModel.class));
     }
 
     @GetMapping("/{id}")
     public City getCityById(@PathVariable Long id) {
 
         return cityService.findById(id);
-    }
-
-    @GetMapping("/{id}/hotel")
-    public Iterable<Hotel> getHotelsByCity(@PathVariable Long id) {
-
-        return cityService.getHotels(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)

@@ -14,9 +14,9 @@ import javax.validation.constraints.Size;
 public class CreateCityRequestModel {
 
     @NotNull(message="Name cannot be null")
-    @Size(min=2, message= "Name must not be less than two characters")
+    @Size(min=2, max=255, message= "Name must not be less than two characters and more than 255")
     private String name;
 
-    @Size(min=16, message= "About message must not be less than 16 characters")
+    @Size(min=16, max=5000, message= "About message must not be less than 16 characters and more than 5000")
     private String about;
 }

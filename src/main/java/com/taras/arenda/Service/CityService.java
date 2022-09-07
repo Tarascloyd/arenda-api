@@ -9,6 +9,8 @@ import com.taras.arenda.jpa.repository.CityRepository;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,11 +20,16 @@ import java.util.UUID;
 public class CityService {
 
     private final CityRepository cityRepo;
-    private final HotelRepository hotelRepo;
 
-    public Iterable<City> findByName(String name) {
-
-        return cityRepo.findByNameContainsAllIgnoreCase(name);
+    public Page<CityDto> findByName(String name, Pageable page) {
+        ModelMapper modelMapper = new ModelMapper();
+        Page<City> cities;
+        if (name == null || name.trim().isEmpty()) {
+            cities = cityRepo.findAll(page);
+        } else {
+            cities = cityRepo.findByNameContainsAllIgnoreCase(name, page);
+        }
+        return cities.map(city -> modelMapper.map(city, CityDto.class));
     }
 
     public City findById(Long id) {
@@ -34,12 +41,6 @@ public class CityService {
     public Iterable<City> findAll() {
 
         return cityRepo.findAll();
-    }
-
-    public Iterable<Hotel> getHotels(Long id) {
-
-        City city = findById(id);
-        return hotelRepo.findAllByCity(city);
     }
 
     public CityDto createCity(CityDto cityDto) {

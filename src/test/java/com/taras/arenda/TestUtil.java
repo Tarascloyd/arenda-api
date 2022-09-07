@@ -1,5 +1,6 @@
 package com.taras.arenda;
 
+import com.taras.arenda.dto.CityDto;
 import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.ui.model.city.CreateCityRequestModel;
 import com.taras.arenda.ui.model.user.CreateUserRequestModel;
@@ -55,6 +56,18 @@ public class TestUtil {
         city.setName("City");
         city.setAbout("About message about our city");
         return city;
+    }
+
+    public static CityDto createValidCityDto() {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(createValidCity(), CityDto.class);
+    }
+
+    public static CityDto createValidCityDto(String name) {
+        ModelMapper modelMapper = new ModelMapper();
+        CityDto cityDto = modelMapper.map(createValidCity(), CityDto.class);
+        cityDto.setName(name);
+        return cityDto;
     }
 
     public <T> HttpEntity<T> getAuthorizedRequest(T body) {

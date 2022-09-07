@@ -30,7 +30,7 @@ public class City implements Serializable, Comparable<City> {
     @Column(name = "NAME")
     private String name;
 
-    @Column(name = "ABOUT")
+    @Column(name = "ABOUT", length = 5000)
     private String about;
 
     @Column(name = "PRICE")

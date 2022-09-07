@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserControllerTest {
 
     private static final String USERS_API_V1_URL = "/api/v1/users";
-    private static final String LOGIN_API_V1_URL = "/api/v1/users/login";
 
     @Autowired
     private TestRestTemplate testRestTemplate;
