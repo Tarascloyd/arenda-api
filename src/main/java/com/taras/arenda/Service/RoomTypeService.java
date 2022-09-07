@@ -40,4 +40,9 @@ public class RoomTypeService {
 
         return modelMapper.map(savedEntity, RoomTypeDto.class);
     }
+
+    public Iterable<RoomType> findRoomTypesByHotel(Long id) {
+        Hotel hotel = hotelService.findById(id);
+        return roomTypeRepo.findAllByHotel(hotel);
+    }
 }

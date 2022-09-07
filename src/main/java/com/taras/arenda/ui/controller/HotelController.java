@@ -10,12 +10,11 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
-@RequestMapping("api/v1/hotel")
+@RequestMapping("api/v1/hotels")
 @AllArgsConstructor
 public class HotelController {
 
     private static final String NOT_IMPLEMENTED_MESSAGE = "Not implemented yet in version v1";
-    private final RoomTypeRepository roomTypeRepo;
     private final HotelService hotelService;
 
     @GetMapping({"/", ""})
@@ -27,10 +26,10 @@ public class HotelController {
         return hotelService.findByName(name);
     }
 
-    @GetMapping("/{id}/roomtype")
-    public Iterable<RoomType> getRoomTypesByHotel(@PathVariable Long id) {
-        Hotel hotel = hotelService.findById(id);
-        return roomTypeRepo.findAllByHotel(hotel);
+    @GetMapping("/city/{id}")
+    public Iterable<Hotel> getHotelsByCity(@PathVariable Long id) {
+
+        return hotelService.getHotelsByCity(id);
     }
 
     //TODO endpoint

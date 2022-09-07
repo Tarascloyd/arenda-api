@@ -2,6 +2,7 @@ package com.taras.arenda.ui.controller;
 
 import com.taras.arenda.Service.RoomTypeService;
 import com.taras.arenda.dto.RoomTypeDto;
+import com.taras.arenda.jpa.entity.Hotel;
 import com.taras.arenda.jpa.entity.RoomType;
 import com.taras.arenda.ui.model.roomtype.CreateRoomTypeRequestModel;
 import com.taras.arenda.ui.model.roomtype.CreateRoomTypeResponseModel;
@@ -33,11 +34,15 @@ public class RoomTypeController {
         return roomTypeService.findTop5ByLowerPrice();
     }
 
+    @GetMapping("/hotel/{id}")
+    public Iterable<RoomType> getRoomTypesByHotel(@PathVariable Long id) {
+        return roomTypeService.findRoomTypesByHotel(id);
+    }
+
     @PostMapping({"/", ""})
     @ResponseStatus(HttpStatus.CREATED)
     public CreateRoomTypeResponseModel createRoomType(@Valid @RequestBody final CreateRoomTypeRequestModel roomType) {
 
-        System.out.println("Запрос создания RoomType: " + roomType);
         ModelMapper modelMapper = new ModelMapper();
 
         RoomTypeDto roomTypeDto = modelMapper.map(roomType, RoomTypeDto.class);
