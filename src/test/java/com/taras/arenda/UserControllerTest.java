@@ -508,13 +508,13 @@ public class UserControllerTest {
         return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
     }
 
-    private <T> ResponseEntity<T> getUser(String email, Class<T> responseType) {
-        String path = USERS_API_V1_URL + "/" + email;
+    private <T> ResponseEntity<T> getUser(String userId, Class<T> responseType) {
+        String path = USERS_API_V1_URL + "/" + userId;
         return testRestTemplate.getForEntity(path, responseType);
     }
 
-    private <T> ResponseEntity<T> getUser(String email, ParameterizedTypeReference<T> responseType) {
-        String path = USERS_API_V1_URL + "/" + email;
+    private <T> ResponseEntity<T> getUser(String userId, ParameterizedTypeReference<T> responseType) {
+        String path = USERS_API_V1_URL + "/" + userId;
         return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
     }
 

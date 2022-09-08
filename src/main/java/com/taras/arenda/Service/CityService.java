@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -32,15 +33,10 @@ public class CityService {
         return cities.map(city -> modelMapper.map(city, CityDto.class));
     }
 
-    public City findById(Long id) {
-
-        return cityRepo.findById(id)
+    public CityDto getCity(String cityId) {
+        City city = cityRepo.findByCityId(cityId)
                 .orElseThrow(ResourceNotFoundException::new);
-    }
-
-    public Iterable<City> findAll() {
-
-        return cityRepo.findAll();
+        return new ModelMapper().map(city, CityDto.class);
     }
 
     public CityDto createCity(CityDto cityDto) {
@@ -51,5 +47,10 @@ public class CityService {
         City savedCity = cityRepo.save(city);
 
         return modelMapper.map(savedCity, CityDto.class);
+    }
+
+    @Transactional
+    public void deleteCity(String cityId) {
+        cityRepo.deleteByCityId(cityId);
     }
 }

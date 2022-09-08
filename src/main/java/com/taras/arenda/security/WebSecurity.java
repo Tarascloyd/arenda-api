@@ -21,7 +21,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private static final String USERS_URL_PATH = "/api/v1/users/**";
 
-    private static final String CITIES_URL_PATH = "/api/v1/cities";
+    private static final String CITIES_URL_PATH = "/api/v1/cities/**";
     private static final String LOGIN_URL_PATH = "/api/v1/users/login";
 
     private final UserService userService;

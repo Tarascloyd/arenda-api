@@ -3,11 +3,13 @@ package com.taras.arenda;
 import com.taras.arenda.Service.CityService;
 import com.taras.arenda.Service.UserService;
 import com.taras.arenda.dto.CityDto;
+import com.taras.arenda.dto.UserDto;
 import com.taras.arenda.exceptions.ApiError;
 import com.taras.arenda.jpa.entity.City;
 import com.taras.arenda.jpa.repository.CityRepository;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
 import com.taras.arenda.jpa.repository.UserRepository;
+import com.taras.arenda.ui.model.GenericResponse;
 import com.taras.arenda.ui.model.city.CityResponseModel;
 import com.taras.arenda.ui.model.city.CreateCityRequestModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -242,11 +246,122 @@ public class CityControllerTest {
         assertThat(city.getCityId()).isEqualTo(cityDto.getCityId());
     }
 
+    @Test
+    public void getCity_whenCityExist_receiveOk() {
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        ResponseEntity<Object> response = getCity(cityDto.getCityId(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void getCity_whenCityExist_receiveCityWithName() {
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        ResponseEntity<Map<String,Object>> response = getCity(cityDto.getCityId(),new ParameterizedTypeReference<Map<String,Object>>() {});
+        Map<String,Object> entity = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.containsKey("name")).isTrue();
+        assertThat(entity.get("name")).isEqualTo(cityDto.getName());
+    }
+
+    @Test
+    public void getCity_whenCityExist_receiveCityWithCityId() {
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        System.out.println(cityDto.getCityId());
+        ResponseEntity<Map<String,Object>> response = getCity(cityDto.getCityId(),new ParameterizedTypeReference<Map<String,Object>>() {});
+        Map<String,Object> entity = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.containsKey("cityId")).isTrue();
+        assertThat(entity.get("cityId")).isEqualTo(cityDto.getCityId());
+    }
+
+    @Test
+    public void getCity_whenCityExist_receiveCityWithAbout() {
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        ResponseEntity<Map<String,Object>> response = getCity(cityDto.getCityId(),new ParameterizedTypeReference<Map<String,Object>>() {});
+        Map<String,Object> entity = response.getBody();
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(entity.containsKey("about")).isTrue();
+        assertThat(entity.get("about")).isEqualTo(cityDto.getAbout());
+    }
+
+    @Test
+    public void getCity_whenCityExist_receiveCityWithoutId() {
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        ResponseEntity<String> response = getCity(cityDto.getCityId(), String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().contains("id")).isFalse();
+    }
+
+    @Test
+    public void getCity_whenCityNotExist_receiveNotFound() {
+        ResponseEntity<Object> response = getCity("random_id", Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void getCity_whenCityNotExist_receiveApiError() {
+        ResponseEntity<ApiError> response = getCity("random_id", ApiError.class);
+        assertThat(response.getBody().getMessage().contains("Resource Not Found")).isTrue();
+    }
+
+    @Test
+    public void deleteCity_whenCityExistAndUserIsUnauthorized_receiveUnauthorized() {
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        ResponseEntity<Object> response = deleteCity(null, cityDto.getCityId(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void deleteCity_whenCityExistAndUserIsAuthorized_receiveOk() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
+
+        ResponseEntity<Object> response = deleteCity(request, cityDto.getCityId(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void deleteCity_whenCityExistAndUserIsAuthorized_receiveGenericResponse() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
+
+        ResponseEntity<GenericResponse> response = deleteCity(request, cityDto.getCityId(), GenericResponse.class);
+        assertThat(response.getBody().getMessage()).isNotNull();
+    }
+
+    @Test
+    public void deleteCity_whenCityExistAndUserIsAuthorized_cityDeleted() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(null);
+
+        deleteCity(request, cityDto.getCityId(), GenericResponse.class);
+        Optional<City> cityInDb = cityRepo.findByCityId(cityDto.getCityId());
+        assertThat(cityInDb.isPresent()).isFalse();
+    }
+
     private <T> ResponseEntity<T> postCity(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(CITIES_API_V1_URL, request, response);
     }
 
     private <T> ResponseEntity<T> getCities(ParameterizedTypeReference<T> responseType) {
         return testRestTemplate.exchange(CITIES_API_V1_URL, HttpMethod.GET, null, responseType);
+    }
+
+    private <T> ResponseEntity<T> getCity(String cityId, Class<T> responseType) {
+        String path = CITIES_API_V1_URL + "/" + cityId;
+        return testRestTemplate.getForEntity(path, responseType);
+    }
+
+    private <T> ResponseEntity<T> getCity(String cityId, ParameterizedTypeReference<T> responseType) {
+        String path = CITIES_API_V1_URL + "/" + cityId;
+        return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
+    }
+
+    private <T> ResponseEntity<T> deleteCity(HttpEntity<Object> request, String cityId, Class<T> responseType) {
+        String path = CITIES_API_V1_URL + "/" + cityId;
+        return testRestTemplate.exchange(path, HttpMethod.DELETE, request, responseType);
     }
 }

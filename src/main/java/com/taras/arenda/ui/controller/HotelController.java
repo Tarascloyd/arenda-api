@@ -26,10 +26,9 @@ public class HotelController {
         return hotelService.findByName(name);
     }
 
-    @GetMapping("/city/{id}")
-    public Iterable<Hotel> getHotelsByCity(@PathVariable Long id) {
-
-        return hotelService.getHotelsByCity(id);
+    @GetMapping("/city/{cityId}")
+    public Iterable<Hotel> getHotelsByCity(@PathVariable String cityId) {
+        return hotelService.getHotelsByCity(cityId);
     }
 
     //TODO endpoint

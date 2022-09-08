@@ -1,10 +1,12 @@
 package com.taras.arenda.Service;
 
+import com.taras.arenda.dto.CityDto;
 import com.taras.arenda.exceptions.ResourceNotFoundException;
 import com.taras.arenda.jpa.entity.City;
 import com.taras.arenda.jpa.entity.Hotel;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,8 +31,9 @@ public class HotelService {
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel"));
     }
 
-    public Iterable<Hotel> getHotelsByCity(Long id) {
-        City city = cityService.findById(id);
-        return hotelRepo.findAllByCity(city);
+    public Iterable<Hotel> getHotelsByCity(String cityId) {
+        CityDto cityDto = cityService.getCity(cityId);
+        ModelMapper modelMapper = new ModelMapper();
+        return hotelRepo.findAllByCity(modelMapper.map(cityDto, City.class));
     }
 }

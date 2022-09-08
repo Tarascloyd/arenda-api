@@ -9,6 +9,7 @@ import com.taras.arenda.jpa.entity.RoomType;
 import com.taras.arenda.jpa.repository.CityRepository;
 import com.taras.arenda.jpa.repository.HotelRepository;
 import com.taras.arenda.jpa.repository.RoomTypeRepository;
+import com.taras.arenda.ui.model.GenericResponse;
 import com.taras.arenda.ui.model.city.CityResponseModel;
 import com.taras.arenda.ui.model.city.CreateCityRequestModel;
 import com.taras.arenda.ui.model.city.CreateCityResponseModel;
@@ -48,10 +49,11 @@ public class CityController {
                 .map(userDto -> modelMapper.map(userDto, CityResponseModel.class));
     }
 
-    @GetMapping("/{id}")
-    public City getCityById(@PathVariable Long id) {
-
-        return cityService.findById(id);
+    @GetMapping("/{cityId}")
+    public CityResponseModel getCity(@PathVariable String cityId) {
+        ModelMapper modelMapper = new ModelMapper();
+        CityDto cityDto = cityService.getCity(cityId);
+        return modelMapper.map(cityDto, CityResponseModel.class);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -76,11 +78,11 @@ public class CityController {
         return NOT_IMPLEMENTED_MESSAGE;
     }
 
-    //TODO endpoint
-    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
-    @DeleteMapping({"/", ""})
-    public String deleteCity() {
-        return NOT_IMPLEMENTED_MESSAGE;
+
+    @DeleteMapping({"/{cityId}"})
+    public GenericResponse deleteCity(@PathVariable String cityId) {
+        cityService.deleteCity(cityId);
+        return new GenericResponse("City is deleted");
     }
 
 //    @PostConstruct
