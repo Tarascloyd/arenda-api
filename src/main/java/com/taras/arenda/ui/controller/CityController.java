@@ -13,6 +13,7 @@ import com.taras.arenda.ui.model.GenericResponse;
 import com.taras.arenda.ui.model.city.CityResponseModel;
 import com.taras.arenda.ui.model.city.CreateCityRequestModel;
 import com.taras.arenda.ui.model.city.CreateCityResponseModel;
+import com.taras.arenda.ui.model.city.UpdateCityRequestModel;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -71,11 +72,17 @@ public class CityController {
         return modelMapper.map(createdCity, CreateCityResponseModel.class);
     }
 
-    //TODO endpoint
-    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
-    @PatchMapping({"/", ""})
-    public String updateCity() {
-        return NOT_IMPLEMENTED_MESSAGE;
+
+    @PatchMapping({"/{cityId}"})
+    public CityResponseModel updateCity(@PathVariable String cityId,
+                                        @Valid @RequestBody final UpdateCityRequestModel cityRequest) {
+        ModelMapper modelMapper = new ModelMapper();
+
+        CityDto cityDto = modelMapper.map(cityRequest, CityDto.class);
+
+        CityDto updatedCity = cityService.updateCity(cityId, cityDto);
+
+        return modelMapper.map(updatedCity, CityResponseModel.class);
     }
 
 

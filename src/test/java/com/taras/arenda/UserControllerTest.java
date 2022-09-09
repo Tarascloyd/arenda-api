@@ -451,7 +451,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void patchUser_whenValidRequestBodyFromAuthorizedUser_recieveUserWithFirstNameUpdated() {
+    public void patchUser_whenValidRequestBodyFromAuthorizedUser_receiveUserWithFirstNameUpdated() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
         HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
@@ -460,7 +460,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void patchUser_whenValidRequestBodyFromAuthorizedUser_recieveUserWithLastNameUpdated() {
+    public void patchUser_whenValidRequestBodyFromAuthorizedUser_receiveUserWithLastNameUpdated() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
         HttpEntity<UpdateUserRequestModel> request = testUtil.getAuthorizedRequest(updatedUser);
@@ -469,7 +469,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void patchUser_whenInvalidRequestBodyLastIsNullFromAuthorizedUser_recieveBadRequest() {
+    public void patchUser_whenInvalidRequestBodyLastIsNullFromAuthorizedUser_receiveBadRequest() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
         updatedUser.setLastName(null);
@@ -479,7 +479,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void patchUser_whenInvalidRequestBodyLastNameIsLessThanRequiredFromAuthorizedUser_recieveBadRequest() {
+    public void patchUser_whenInvalidRequestBodyLastNameIsLessThanRequiredFromAuthorizedUser_receiveBadRequest() {
         UserDto user = userService.createUser(TestUtil.createValidUserDto());
         UpdateUserRequestModel updatedUser = createValidUpdateUserRM();
         updatedUser.setLastName("a");

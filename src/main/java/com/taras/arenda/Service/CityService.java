@@ -4,9 +4,7 @@ package com.taras.arenda.Service;
 import com.taras.arenda.dto.CityDto;
 import com.taras.arenda.exceptions.ResourceNotFoundException;
 import com.taras.arenda.jpa.entity.City;
-import com.taras.arenda.jpa.entity.Hotel;
 import com.taras.arenda.jpa.repository.CityRepository;
-import com.taras.arenda.jpa.repository.HotelRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -52,5 +50,14 @@ public class CityService {
     @Transactional
     public void deleteCity(String cityId) {
         cityRepo.deleteByCityId(cityId);
+    }
+
+    public CityDto updateCity(String cityId, CityDto cityDto) {
+        ModelMapper modelMapper = new ModelMapper();
+        City cityInDB = cityRepo.findByCityId(cityId)
+                .orElseThrow(ResourceNotFoundException::new);
+        cityInDB.setAbout(cityDto.getAbout());
+        City savedCity = cityRepo.save(cityInDB);
+        return modelMapper.map(savedCity, CityDto.class);
     }
 }

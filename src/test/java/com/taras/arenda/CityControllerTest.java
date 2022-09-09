@@ -12,7 +12,9 @@ import com.taras.arenda.jpa.repository.UserRepository;
 import com.taras.arenda.ui.model.GenericResponse;
 import com.taras.arenda.ui.model.city.CityResponseModel;
 import com.taras.arenda.ui.model.city.CreateCityRequestModel;
+import com.taras.arenda.ui.model.city.UpdateCityRequestModel;
 import com.taras.arenda.ui.model.user.CreateUserRequestModel;
+import com.taras.arenda.ui.model.user.UpdateUserRequestModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -371,6 +373,139 @@ public class CityControllerTest {
         assertThat(cityInDb.isPresent()).isFalse();
     }
 
+    @Test
+    public void patchCity_whenUserIsUnauthorized_receiveUnauthorized() {
+        ResponseEntity<Object> response = patchCity(null, "/random_id", Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void patchCity_whenUserIsUnauthorized_receiveApiError() {
+        ResponseEntity<ApiError> response = patchCity(null, "/random_id", ApiError.class);
+        assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void patchCity_whenCityIsValidAndExistAndUserIsAuthorized_receiveOk() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<Object> response = patchCity(request, cityDto.getCityId(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void patchCity_whenCityIsValidAndDoesNotExistAndUserIsAuthorized_receiveNotFound() {
+        userService.createUser(TestUtil.createValidUserDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<Object> response = patchCity(request, "/random_id", Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void patchCity_whenCityIsValidAndDoesNotExistAndUserIsAuthorized_receiveApiError() {
+        userService.createUser(TestUtil.createValidUserDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<ApiError> response = patchCity(request, "/random_id", ApiError.class);
+        assertThat(response.getBody().getMessage()).isEqualTo("Resource Not Found");
+    }
+
+    @Test
+    public void patchCity_whenCityIsValidAndExistAndUserIsAuthorized_receiveCityWithAboutUpdated() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<CityResponseModel> response = patchCity(request, cityDto.getCityId(), CityResponseModel.class);
+        assertThat(response.getBody().getAbout()).isEqualTo(city.getAbout());
+        assertThat(response.getBody().getAbout()).isNotEqualTo(cityDto.getAbout());
+    }
+
+    @Test
+    public void patchCity_whenCityIsValidAndExistAndUserIsAuthorized_receiveCityWithNameStaysSame() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<CityResponseModel> response = patchCity(request, cityDto.getCityId(), CityResponseModel.class);
+        assertThat(response.getBody().getName()).isEqualTo(cityDto.getName());
+    }
+
+    @Test
+    public void patchCity_whenCityIsValidAndExistAndUserIsAuthorized_receiveCityWithCityId() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<CityResponseModel> response = patchCity(request, cityDto.getCityId(), CityResponseModel.class);
+        assertThat(response.getBody().getCityId()).isEqualTo(cityDto.getCityId());
+    }
+
+    @Test
+    public void patchCity_whenCityIsValidAndExistAndUserIsAuthorized_aboutUpdated() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        patchCity(request, cityDto.getCityId(), CityResponseModel.class);
+        City cityInDB = cityRepo.findByCityId(cityDto.getCityId()).orElse(null);
+        assertThat(cityInDB.getAbout()).isEqualTo(city.getAbout());
+        assertThat(cityInDB.getAbout()).isNotEqualTo(cityDto.getAbout());
+    }
+
+    @Test
+    public void patchCity_whenAboutIsLessThan16CharactersAndCityExistAndUserIsAuthorized_receiveBadRequest() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        city.setAbout("short message");
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<Object> response = patchCity(request, cityDto.getCityId(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void patchCity_whenAboutIs5001CharactersAndCityExistAndUserIsAuthorized_receiveBadRequest() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        String veryLongString = IntStream.rangeClosed(1,5001).mapToObj(i -> "x").collect(Collectors.joining());
+        city.setAbout(veryLongString);
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<Object> response = patchCity(request, cityDto.getCityId(), Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void patchCity_whenAboutIsLessThan16CharactersAndCityExistAndUserIsAuthorized_receiveApiErrorWithValidationErrors() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CityDto cityDto = cityService.createCity(TestUtil.createValidCityDto());
+        UpdateCityRequestModel city = createValidUpdateCityRM();
+        city.setAbout("short message");
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+
+        ResponseEntity<ApiError> response = patchCity(request, cityDto.getCityId(), ApiError.class);
+        assertThat(response.getBody().getErrors().get("about")).isNotNull();
+    }
+
+    private UpdateCityRequestModel createValidUpdateCityRM() {
+        UpdateCityRequestModel updatedCity = new UpdateCityRequestModel();
+        updatedCity.setAbout("Updated about message");
+        return updatedCity;
+    }
+
     private <T> ResponseEntity<T> postCity(Object request, Class<T> response) {
         return testRestTemplate.postForEntity(CITIES_API_V1_URL, request, response);
     }
@@ -392,5 +527,10 @@ public class CityControllerTest {
     private <T> ResponseEntity<T> deleteCity(HttpEntity<Object> request, String cityId, Class<T> responseType) {
         String path = CITIES_API_V1_URL + "/" + cityId;
         return testRestTemplate.exchange(path, HttpMethod.DELETE, request, responseType);
+    }
+
+    private <T> ResponseEntity<T> patchCity(HttpEntity<Object> request, String cityId, Class<T> responseType) {
+        String path = CITIES_API_V1_URL + "/" + cityId;
+        return testRestTemplate.exchange(path, HttpMethod.PATCH, request, responseType);
     }
 }
