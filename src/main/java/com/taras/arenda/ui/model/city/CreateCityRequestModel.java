@@ -1,6 +1,7 @@
 package com.taras.arenda.ui.model.city;
 
 
+import com.taras.arenda.ui.validation.UniqueCityName;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import javax.validation.constraints.Size;
 @Data
 public class CreateCityRequestModel {
 
+    @UniqueCityName
     @NotNull(message="Name cannot be null")
     @Size(min=2, max=255, message= "Name must not be less than two characters and more than 255")
     private String name;

@@ -12,6 +12,7 @@ import com.taras.arenda.jpa.repository.UserRepository;
 import com.taras.arenda.ui.model.GenericResponse;
 import com.taras.arenda.ui.model.city.CityResponseModel;
 import com.taras.arenda.ui.model.city.CreateCityRequestModel;
+import com.taras.arenda.ui.model.user.CreateUserRequestModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,6 +192,34 @@ public class CityControllerTest {
 
         ResponseEntity<ApiError> response = postCity(request, ApiError.class);
         assertThat(response.getBody().getErrors().get("name")).isNotNull();
+    }
+
+    @Test
+    public void postCity_whenAnotherCityHasSameNameAndUserIsAuthorized_receiveBadRequest() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CreateCityRequestModel city = TestUtil.createValidCity();
+
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+        postCity(request, Object.class);
+
+        city.setAbout("Another about message");
+        HttpEntity<Object> anotherRequest = testUtil.getAuthorizedRequest(city);
+        ResponseEntity<Object> response = postCity(anotherRequest, Object.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postCity_whenAnotherCityHasSameNameAndUserIsAuthorized_receiveMessageOfDuplicateName() {
+        userService.createUser(TestUtil.createValidUserDto());
+        CreateCityRequestModel city = TestUtil.createValidCity();
+
+        HttpEntity<Object> request = testUtil.getAuthorizedRequest(city);
+        postCity(request, Object.class);
+
+        city.setAbout("Another about message");
+        HttpEntity<Object> anotherRequest = testUtil.getAuthorizedRequest(city);
+        ResponseEntity<ApiError> response = postCity(anotherRequest, ApiError.class);
+        assertThat(response.getBody().getErrors().get("name")).isEqualTo("This Name is in use");
     }
 
     @Test

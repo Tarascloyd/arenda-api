@@ -14,6 +14,7 @@ public interface CityRepository  extends JpaRepository<City, Long> {
     Page<City> findByNameContainsAllIgnoreCase(String theName, Pageable page);
 
     Optional<City> findByCityId(String cityId);
+    Optional<City> findByName(String name);
 
     @Modifying
     @Query("update City c set c.deleted = true where c.cityId = ?1")
