@@ -46,7 +46,7 @@ public class CityController {
             @RequestParam(name = "name", required = false) String name,
             Pageable page) {
         ModelMapper modelMapper = new ModelMapper();
-        return cityService.findByName(name, page)
+        return cityService.findAllByName(name, page)
                 .map(userDto -> modelMapper.map(userDto, CityResponseModel.class));
     }
 

@@ -20,7 +20,7 @@ public class CityService {
 
     private final CityRepository cityRepo;
 
-    public Page<CityDto> findByName(String name, Pageable page) {
+    public Page<CityDto> findAllByName(String name, Pageable page) {
         ModelMapper modelMapper = new ModelMapper();
         Page<City> cities;
         if (name == null || name.trim().isEmpty()) {
